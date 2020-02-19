@@ -244,7 +244,7 @@ classdef ModSchemes
 %             scatterplot(complexChips(:))
         end
         
-        function [RxBits] = CCKDemodulator(inputSymbols, dataRate)
+        function [rxBits] = CCKDemodulator(inputSymbols, dataRate)
             % takes in symbol stream (chipped) and demodulates to obtain a
             % bit data stream in binary
             % * bitDelay is set to be a multiple of bps
@@ -305,12 +305,8 @@ classdef ModSchemes
                 c7_PHI1_codeword_est = symsOctet(n,:) * conj(symsOctet(n, 8)); 
                 realimag_c7_PHI1_codeword_est = [real(c7_PHI1_codeword_est), imag(c7_PHI1_codeword_est)];
 
-                % dsearchn: N-dimensional nearest point search for PHI 1 
-                %            without using a triangulation
-                %           - returns the inices fo the closest points
-                estIdx(n) = dsearchn(allcodewordsPHI23.', realimag_c7_PHI1_codeword_est);
-
                 % for odd symbols, add extra 180' shift
+                % estPhi1 is running estimate of phi 1 (based on previous values)
                 evenOddIndex = n - 1;
                 if (mod(evenOddIndex,2)) % even
                     % no shift if even symbols --> 0'
@@ -325,20 +321,25 @@ classdef ModSchemes
                 % every chip in a code word can receive 4 values {1,-1, j,-j}, 
                 % so there are a total of 4^8 = 65536 different combinations of 8 chips.
                 allValuesForChip = [1, 1j, -1, -1j]; % in a codeword c0-07
+                
                 % find the shifted PHI 1 value from the table of 4 states
+                % dsearchn: N-dimensional nearest point search for PHI 1 
+                %            without using a triangulation
+                %           - returns the indices fo the closest points
                 idx = dsearchn([real(allValuesForChip); imag(allValuesForChip)].', ...
                                 [real(shiftedPHI1), imag(shiftedPHI1)]);
                 dibit_1 = dibitStates(idx, :);
                 % dibit represented in 8-bit
-                add = bi2de([dibit_1, zeros([1, bps-2])], 'left-msb');
-                % add the shift
-                idxoffset = 1;
-                estIdx(n) = estIdx(n) + add - idxoffset;
+                cumulative = bi2de([dibit_1, zeros([1, bps-2])], 'left-msb');
+                
+                % add the odd (pi) shift to the even phase angle
+                idxoffset = 1; % to start from 0
+                estIdx(n,1) = dsearchn(allcodewordsPHI23.', realimag_c7_PHI1_codeword_est) + cumulative - idxoffset;
                 
                 estPhi1 = symsOctet(n, 8); % update estimate with c7 value
             end
-
-            RxBits = reshape(de2bi(estIdx, bps, 'left-msb').', [], 1); 
+            % make column vector
+            rxBits = reshape(de2bi(estIdx, bps, 'left-msb').', [], 1); 
         end
     end % end methods
 end % end classdef
