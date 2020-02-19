@@ -1,6 +1,6 @@
 ##### WLAN IEEE 802.11b
 
-- Simulation of IEEE 802.11b (Wireless Local Area Network) in MATLAB
+- Simulation of IEEE 802.11b (Wireless Local Area Network) in MATLAB (R2019b; Requires Comms (modulators), DSP (comm. fcns), WLAN (scrambler) Toolbox)
 - For code, _wlan80211b_packetframe.m_ should contain packet frame generation (though preamble, header verification is omitted on the receiver side due to poor decoding predictions for CCK at the moment)
 
 ##### IEEE 802.11b
