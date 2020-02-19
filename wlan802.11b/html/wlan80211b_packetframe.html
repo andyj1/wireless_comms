@@ -1,0 +1,351 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>wlan80211b_packetframe</title><meta name="generator" content="MATLAB 9.7"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2020-02-19"><meta name="DC.source" content="wlan80211b_packetframe.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">IEEE 802.11b</a></li></ul></div><pre class="codeinput"><span class="comment">% ECE408 - Wireless Communications</span>
+<span class="comment">% Jongoh (Andy) Jeong</span>
+<span class="comment">% 802.11b WLAN Standard - Simulation Project</span>
+<span class="comment">% Date: February 19, 2020</span>
+clear <span class="string">all</span>; close <span class="string">all</span>; clc;
+</pre><h2 id="2">IEEE 802.11b</h2><pre class="codeinput">reset(RandStream.getGlobalStream);
+rng <span class="string">default</span>; <span class="comment">% for reproducibility</span>
+
+<span class="comment">% Simulation Parameters</span>
+snrVector = -8:2:10;
+nIter = 10;
+<span class="comment">% min: 4, max: 8192 as per 802.11 standards</span>
+octetNumber = 1024; <span class="comment">% number of octets</span>
+<span class="comment">% samples per chip; samples will be up/down-sampled to this reference</span>
+spc = 8;
+
+<span class="comment">% call objects for modulation / demodulation with appropriate parameters</span>
+modFcns = {@(x, rate) ModSchemes.BarkerModulator(x,rate), <span class="keyword">...</span>
+           @(x, rate) ModSchemes.BarkerModulator(x,rate), <span class="keyword">...</span>
+           @(x, rate) ModSchemes.CCKModulator(x,rate), <span class="keyword">...</span>
+           @(x, rate) ModSchemes.CCKModulator(x,rate)};
+demodFcns = {@(x, rate) ModSchemes.BarkerDemodulator(x,rate), <span class="keyword">...</span>
+           @(x, rate) ModSchemes.BarkerDemodulator(x,rate), <span class="keyword">...</span>
+           @(x, rate) ModSchemes.CCKDemodulator(x,rate), <span class="keyword">...</span>
+           @(x, rate) ModSchemes.CCKDemodulator(x,rate)};
+
+<span class="comment">% supported data rates as per 802.11b standard</span>
+dataRates = [1, 2, 5.5, 11];
+<span class="comment">% bits per symbol for all data rates</span>
+BPSes = [1, 2, 4, 8];
+<span class="comment">% chip spreading rates for all data rates</span>
+chipSpreadLengths = [11, 11, 8, 8];
+
+<span class="comment">% scrambler initialization seed</span>
+<span class="comment">% scramInit = 93;</span>
+<span class="comment">% msgBinSc = wlanScramble(msgBin,scramInit);</span>
+<span class="comment">% RxBits = wlanScramble(RxBitsDsc, scramInit);</span>
+
+BERVector = zeros(length(dataRates),length(snrVector));
+fprintf(<span class="string">'Simulation starting...\n'</span>); tic;
+<span class="keyword">for</span> rate=1:length(dataRates) <span class="comment">%corrersponding to 4 different rate options (1, 2, 5.5, 11 Mbps)</span>
+    fprintf(<span class="string">'Data rate: %.1f Mbps\n'</span>, dataRates(rate));
+    <span class="keyword">for</span> i=1:length(snrVector)
+        fprintf(<span class="string">'SNR: %.1f\t'</span>, snrVector(i));
+        totalbits = 0;
+        nerror = 0;
+        <span class="keyword">for</span> iter = 1:nIter
+            <span class="comment">% adjust SNR</span>
+            sampRate = chipSpreadLengths(rate) * spc;
+            snrdB = snrVector(i) + 10*log10(BPSes(rate)) - 10*log10(sampRate);
+
+            <span class="comment">% generate packet</span>
+            msgBin = randi([0 1],octetNumber*8,1);
+            [preamble, header, mpdu] = generatePacket(msgBin, 1);
+
+            <span class="comment">% modulate</span>
+            preambleMod = ModSchemes.BarkerModulator(preamble',1);
+            headerMod = ModSchemes.BarkerModulator(header',1);
+            msgMod = modFcns{rate}(msgBin, dataRates(rate));
+
+            <span class="comment">% - Frame: pack a packet frame withou mpdu since preamble and header</span>
+            <span class="comment">% each needs to be modulated separately as DSSS1M</span>
+            txFrame = [preambleMod', headerMod'];
+            txNoisyFrame = awgn(txFrame, snrdB, <span class="string">'measured'</span>);
+
+            <span class="comment">% - PSDU: upsample, pass through a pulse shaping filter</span>
+            [h, upsampledChips, chipFilterDelay] = Filter.PulseShapeFilter(msgMod, spc);
+            samples = filter(h,1,upsampledChips);
+            <span class="comment">% pass samples through an AWGN channel with adjusted SNR</span>
+            txNoisy = awgn(samples, snrdB, <span class="string">'measured'</span>);
+
+            <span class="comment">% filer back (and downsample), perfectly knowing impulse response of the filter</span>
+            filtTxSig = filter(h,1,txNoisy); <span class="comment">% column vector</span>
+            [RxChips,bitDelay] = Filter.Receiver(filtTxSig, spc, chipFilterDelay, BPSes(rate), chipSpreadLengths(rate));
+
+            <span class="comment">% demodulate</span>
+            frameRx = ModSchemes.BarkerDemodulator(txNoisyFrame,1);
+
+            <span class="comment">% parse packet frame</span>
+            [preambleRx, headerRx] = parseFrame(frameRx');
+            checked = checkFrame(preambleRx, headerRx);
+
+            <span class="keyword">if</span> checked == true
+                rxBits = demodFcns{rate}(RxChips, dataRates(rate));
+                <span class="comment">% compute number of error bits</span>
+                overlapSequenceMsgBin = msgBin(1:end-bitDelay);
+                overlapSequenceRxBin = rxBits(bitDelay+1:end);
+                <span class="comment">% accumulate error and total bits over iterations</span>
+                nerror = nerror + sum(overlapSequenceMsgBin ~= overlapSequenceRxBin);
+                totalbits = totalbits + (length(rxBits) - bitDelay);
+            <span class="keyword">end</span>
+            fprintf(<span class="string">'.'</span>);
+        <span class="keyword">end</span>
+        fprintf(<span class="string">'\n'</span>);
+        BERVector(i, rate) = nerror/totalbits;
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+toc;
+fprintf(<span class="string">'Simulation completed.\n'</span>);
+</pre><pre class="codeoutput">Simulation starting...
+Data rate: 1.0 Mbps
+SNR: -8.0	..........
+SNR: -6.0	..........
+SNR: -4.0	..........
+SNR: -2.0	..........
+SNR: 0.0	..........
+SNR: 2.0	..........
+SNR: 4.0	..........
+SNR: 6.0	..........
+SNR: 8.0	..........
+SNR: 10.0	..........
+Data rate: 2.0 Mbps
+SNR: -8.0	..........
+SNR: -6.0	..........
+SNR: -4.0	..........
+SNR: -2.0	..........
+SNR: 0.0	..........
+SNR: 2.0	..........
+SNR: 4.0	..........
+SNR: 6.0	..........
+SNR: 8.0	..........
+SNR: 10.0	..........
+Data rate: 5.5 Mbps
+SNR: -8.0	..........
+SNR: -6.0	..........
+SNR: -4.0	..........
+SNR: -2.0	..........
+SNR: 0.0	..........
+SNR: 2.0	..........
+SNR: 4.0	..........
+SNR: 6.0	..........
+SNR: 8.0	..........
+SNR: 10.0	..........
+Data rate: 11.0 Mbps
+SNR: -8.0	..........
+SNR: -6.0	..........
+SNR: -4.0	..........
+SNR: -2.0	..........
+SNR: 0.0	..........
+SNR: 2.0	..........
+SNR: 4.0	..........
+SNR: 6.0	..........
+SNR: 8.0	..........
+SNR: 10.0	..........
+Elapsed time is 82.255146 seconds.
+Simulation completed.
+</pre><pre class="codeinput">figure;
+<span class="keyword">for</span> rate=1:4
+    subplot(2,2,rate);semilogy(snrVector,BERVector(:,rate),<span class="string">'*-'</span>);grid <span class="string">on</span>;
+    title_str = {[<span class="string">'802.11b: BER for rate = '</span> num2str(dataRates(rate))<span class="keyword">...</span>
+                 <span class="string">'Mbps'</span>] <span class="string">'through an AWGN Channel'</span>};
+    title(title_str); xlabel(<span class="string">'Eb/No (dB)'</span>); ylabel(<span class="string">'Bit Error Rate'</span>);
+<span class="keyword">end</span>
+</pre><img vspace="5" hspace="5" src="wlan80211b_packetframe_01.png" alt=""> <pre class="codeinput">figure;
+<span class="keyword">for</span> rate=1:4
+    semilogy(snrVector, BERVector(:,rate),<span class="string">'^-'</span>); grid <span class="string">on</span>; hold <span class="string">on</span>;
+<span class="keyword">end</span>
+hold <span class="string">off</span>;
+title(<span class="string">'802.11b: BER vs. SNR of Tx through an AWGN channel'</span>);
+legend(<span class="string">'Barker1'</span>,<span class="string">'Barker2'</span>,<span class="string">'CCK5.5'</span>,<span class="string">'CCK11'</span>,<span class="string">'Location'</span>,<span class="string">'SouthWest'</span>);
+xlabel(<span class="string">'Eb/No (dB)'</span>); ylabel(<span class="string">'Bit Error Rate'</span>);
+</pre><img vspace="5" hspace="5" src="wlan80211b_packetframe_02.png" alt=""> <p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2019b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+% ECE408 - Wireless Communications
+% Jongoh (Andy) Jeong
+% 802.11b WLAN Standard - Simulation Project
+% Date: February 19, 2020
+clear all; close all; clc;
+
+%% IEEE 802.11b
+reset(RandStream.getGlobalStream);
+rng default; % for reproducibility
+
+% Simulation Parameters
+snrVector = -8:2:10;
+nIter = 10; 
+% min: 4, max: 8192 as per 802.11 standards
+octetNumber = 1024; % number of octets
+% samples per chip; samples will be up/down-sampled to this reference
+spc = 8;       
+
+% call objects for modulation / demodulation with appropriate parameters
+modFcns = {@(x, rate) ModSchemes.BarkerModulator(x,rate), ...
+           @(x, rate) ModSchemes.BarkerModulator(x,rate), ...
+           @(x, rate) ModSchemes.CCKModulator(x,rate), ...
+           @(x, rate) ModSchemes.CCKModulator(x,rate)};
+demodFcns = {@(x, rate) ModSchemes.BarkerDemodulator(x,rate), ...
+           @(x, rate) ModSchemes.BarkerDemodulator(x,rate), ...
+           @(x, rate) ModSchemes.CCKDemodulator(x,rate), ...
+           @(x, rate) ModSchemes.CCKDemodulator(x,rate)};
+
+% supported data rates as per 802.11b standard
+dataRates = [1, 2, 5.5, 11];
+% bits per symbol for all data rates
+BPSes = [1, 2, 4, 8];
+% chip spreading rates for all data rates
+chipSpreadLengths = [11, 11, 8, 8];
+
+% scrambler initialization seed
+% scramInit = 93;
+% msgBinSc = wlanScramble(msgBin,scramInit);
+% RxBits = wlanScramble(RxBitsDsc, scramInit);
+
+BERVector = zeros(length(dataRates),length(snrVector));
+fprintf('Simulation starting...\n'); tic;
+for rate=1:length(dataRates) %corrersponding to 4 different rate options (1, 2, 5.5, 11 Mbps)
+    fprintf('Data rate: %.1f Mbps\n', dataRates(rate));
+    for i=1:length(snrVector)
+        fprintf('SNR: %.1f\t', snrVector(i));
+        totalbits = 0; 
+        nerror = 0;
+        for iter = 1:nIter
+            % adjust SNR
+            sampRate = chipSpreadLengths(rate) * spc;
+            snrdB = snrVector(i) + 10*log10(BPSes(rate)) - 10*log10(sampRate);
+            
+            % generate packet
+            msgBin = randi([0 1],octetNumber*8,1);
+            [preamble, header, mpdu] = generatePacket(msgBin, 1);
+            
+            % modulate
+            preambleMod = ModSchemes.BarkerModulator(preamble',1);
+            headerMod = ModSchemes.BarkerModulator(header',1);
+            msgMod = modFcns{rate}(msgBin, dataRates(rate));
+            
+            % - Frame: pack a packet frame withou mpdu since preamble and header
+            % each needs to be modulated separately as DSSS1M
+            txFrame = [preambleMod', headerMod'];
+            txNoisyFrame = awgn(txFrame, snrdB, 'measured');
+            
+            % - PSDU: upsample, pass through a pulse shaping filter
+            [h, upsampledChips, chipFilterDelay] = Filter.PulseShapeFilter(msgMod, spc);
+            samples = filter(h,1,upsampledChips);
+            % pass samples through an AWGN channel with adjusted SNR
+            txNoisy = awgn(samples, snrdB, 'measured');
+            
+            % filer back (and downsample), perfectly knowing impulse response of the filter
+            filtTxSig = filter(h,1,txNoisy); % column vector
+            [RxChips,bitDelay] = Filter.Receiver(filtTxSig, spc, chipFilterDelay, BPSes(rate), chipSpreadLengths(rate));
+            
+            % demodulate
+            frameRx = ModSchemes.BarkerDemodulator(txNoisyFrame,1);
+            
+            % parse packet frame
+            [preambleRx, headerRx] = parseFrame(frameRx');
+            checked = checkFrame(preambleRx, headerRx);
+            
+            if checked == true
+                rxBits = demodFcns{rate}(RxChips, dataRates(rate));    
+                % compute number of error bits
+                overlapSequenceMsgBin = msgBin(1:end-bitDelay);
+                overlapSequenceRxBin = rxBits(bitDelay+1:end);
+                % accumulate error and total bits over iterations
+                nerror = nerror + sum(overlapSequenceMsgBin ~= overlapSequenceRxBin);
+                totalbits = totalbits + (length(rxBits) - bitDelay);
+            end
+            fprintf('.');
+        end
+        fprintf('\n');
+        BERVector(i, rate) = nerror/totalbits;
+    end
+end
+toc;
+fprintf('Simulation completed.\n');
+%%
+figure;
+for rate=1:4
+    subplot(2,2,rate);semilogy(snrVector,BERVector(:,rate),'*-');grid on; 
+    title_str = {['802.11b: BER for rate = ' num2str(dataRates(rate))...
+                 'Mbps'] 'through an AWGN Channel'}; 
+    title(title_str); xlabel('Eb/No (dB)'); ylabel('Bit Error Rate');
+end
+%% 
+figure;
+for rate=1:4
+    semilogy(snrVector, BERVector(:,rate),'^-'); grid on; hold on;
+end
+hold off;
+title('802.11b: BER vs. SNR of Tx through an AWGN channel');
+legend('Barker1','Barker2','CCK5.5','CCK11','Location','SouthWest');
+xlabel('Eb/No (dB)'); ylabel('Bit Error Rate');
+##### SOURCE END #####
+--></body></html>
