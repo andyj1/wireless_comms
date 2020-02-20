@@ -1,9 +1,15 @@
-% plot modulated signal, noisy signal after adding AWGN, and after demod
-figure; 
-scatter(real(msgMod),imag(msgMod),'filled','m','LineWidth',1.5);
-hold on;
-scatter(real(txNoisy),imag(txNoisy),'MarkerEdgeColor','r','LineWidth',1);
-hold on;
-scatter(real(rxBits),imag(rxBits),'MarkerEdgeColor','g','LineWidth',2); hold off;
-title('I-Q Phase');
-legend('Modulated (Barker1)','After AWGN','Demodulated (Barker1)');
+function plotScatter(fig, msgMod, symbolsTx, rxSyms, rate)
+    % plot modulated signal, noisy signal after adding AWGN, and after demod
+    
+    scatter(real(symbolsTx),imag(symbolsTx),50,'filled','y','MarkerEdgeColor','y','LineWidth',3);
+    hold on;
+    scatter(real(msgMod),imag(msgMod),50,'filled','r');
+    hold on;
+    scatter(real(rxSyms),imag(rxSyms),5, 'filled','g'); 
+    hold off;
+    title(strcat(num2str(rate),' Mbps Scatterplot for PPDU'));
+    xlabel('In-phase amplitude'); ylabel('Quadrature Amplitude');
+    xlim([-1.1 1.1]); ylim([-1.1 1.1]);
+    legend('Tx Symbols','AWGN Channel','Rx Symbols');
+    set(gca, 'FontSize', 12, 'FontWeight','bold');  
+end

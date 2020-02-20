@@ -10,7 +10,7 @@ rng default; % for reproducibility
 
 % Simulation Parameters
 snrVector = -8:1:30;
-nIter = 1; 
+nIter = 10; 
 % packet size: min: 4, max: 8192 as per 802.11 standards
 octetNumber = 1024; % number of octets (will be multiplied by 8)
 % samples per chip; samples will be up/down-sampled to this reference
@@ -58,10 +58,10 @@ for rate = 1:length(dataRates) %corrersponding to 4 different rate options (1, 2
             % modulate
             preambleMod = ModSchemes.BarkerModulator(preamble',1);
             headerMod = ModSchemes.BarkerModulator(header',1);
-            txSyms = modFcns{rate}(psdu, dataRates(rate));
+            msgMod = modFcns{rate}(psdu, dataRates(rate));
             
             % PSDU only: upsample, pass through a pulse shaping filter
-            [h, upsampledChips, chipFilterDelay] = Filter.PulseShapeFilter(txSyms, spc);
+            [h, upsampledChips, chipFilterDelay] = Filter.PulseShapeFilter(msgMod, spc);
             samples = filter(h,1,upsampledChips);
             
             % pack a PLCP packet frame
@@ -78,17 +78,18 @@ for rate = 1:length(dataRates) %corrersponding to 4 different rate options (1, 2
             % filer back (and downsample) PSDU only
             % assumption: perfectly knowing impulse response of the filter
             filtTxSig = filter(h,1,samplesTx); % column vector
-            [rxSyms,bitDelay] = Filter.Receiver(filtTxSig, spc, chipFilterDelay, BPSes(rate), chipSpreadLengths(rate));
+            [rxChips,bitDelay] = Filter.Receiver(filtTxSig, spc, chipFilterDelay, BPSes(rate), chipSpreadLengths(rate));
+            
+            % demodulate PSDU
+            rxBits = demodFcns{rate}(rxChips, dataRates(rate));    
             
             % demodulate preamble and header
             frameRx = ModSchemes.BarkerDemodulator([preambleTx; headerTx],1);
+            
             % parse packet frame
             [preambleRx, headerRx] = parseFrame(frameRx');
             checked = checkFrame(preamble, header, preambleRx, headerRx, dataRates(rate));
 
-            % demodulate PSDU by methods specified in the preamble/header
-            rxBits = demodFcns{rate}(rxSyms, dataRates(rate));    
-            
             if checked == true
                 % compute number of error bits
                 overlapSequenceMsgBin = msgBin(1:end-bitDelay);
@@ -116,7 +117,7 @@ for i = 1:size(BERVector,2)
     BERVector(idxZero:end,i) = 0;
     
     fig = subplot(strcat('22',num2str(i)));
-    plotScatter(fig, txFrame, txNoisy, rxSyms, dataRates(i));
+    plotScatter(fig, msgMod, samplesTx, rxBits, dataRates(i));
 end
 
 %% BER curve for each data rate

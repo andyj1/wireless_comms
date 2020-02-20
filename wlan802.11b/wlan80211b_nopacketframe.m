@@ -9,7 +9,7 @@ reset(RandStream.getGlobalStream);
 rng default; % for reproducibility
 
 % Simulation Parameters
-snrVector = 0:2:10;
+snrVector = -8:2:10;
 nIter = 1; 
 % min: 4, max: 8192 as per 802.11 standards
 PacketSizeBits = 8192; % 802.11 packet size
@@ -50,7 +50,7 @@ for rate=1:length(dataRates) %corrersponding to 4 different rate options (1, 2, 
             % modulate
             msgMod = modFcns{rate}(msgBin, dataRates(rate));
             % upsample, pass through a pulse shaping filter
-            [h, upsampledChips, chipFilterDelay] = Filter.PulseShapeFilter(msgMod, spc);
+            [h, upsampledChips, chipFilterDelay] = Filter.PulseShapeFilter(msgMod, spc); 
             samples = filter(h,1,upsampledChips);
             % pass through an AWGN channel with adjusted SNR
             txNoisy = awgn(samples, snrdB, 'measured');

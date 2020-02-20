@@ -1,0 +1,13 @@
+function plotScatter(fig, msgMod, symbolsTx, rxBits, rate)
+    % plot modulated signal, noisy signal after adding AWGN, and after demod
+    scatter(real(msgMod),imag(msgMod),150,'filled','r');
+    hold on;
+    scatter(real(symbolsTx),imag(symbolsTx),10,'filled','y','MarkerEdgeColor','y','LineWidth',3);
+    hold on;
+    scatter(real(rxBits),imag(rxBits),80, 'filled','g'); 
+    hold off;
+    title(strcat(num2str(rate),' Mbps Scatterplot for PSDU at Baseband'));
+    xlabel('In-phase amplitude'); ylabel('Quadrature Amplitude');
+    xlim([-1.1 1.1]); ylim([-1.1 1.1]);
+    legend('Tx Symbols','AWGN Channel','Rx Symbols');
+end

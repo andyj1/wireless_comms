@@ -7,11 +7,11 @@ classdef Filter
         
         function [h, upsampledChips, chipFilterDelay] = PulseShapeFilter(symbols, spc)
             span = 5;
-            beta = 0.3;
+            beta = 0.7;
             fcutoff = 7e6;
             fsamp = 88e6;
             M = span * spc; % filter order
-
+            
             delayFilter = M/2; % default delay for this root raised cosine
             KaiserWindow = kaiser(M+1,1);
             % the most recent version of 'firrcos' is 'rcosdesign,' but
@@ -20,6 +20,10 @@ classdef Filter
             % use a Kaiser window as it is known to work rather well. So
             h = firrcos(M,fcutoff,beta,fsamp, ...
                         'rolloff','sqrt',delayFilter,KaiserWindow);
+            
+            % plot impulse response
+            % fvtool(h, fsamp, 'Analysis', 'impulse');
+            
             % compute filter delay 
             Ntap = length(h);
             sampleFilterDelay = Ntap-1;
