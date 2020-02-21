@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>wlan80211b_packetframe</title><meta name="generator" content="MATLAB 9.7"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2020-02-20"><meta name="DC.source" content="wlan80211b_packetframe.m"><style type="text/css">
+      --><title>wlan80211b_packetframe</title><meta name="generator" content="MATLAB 9.7"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2020-02-21"><meta name="DC.source" content="wlan80211b_packetframe.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -66,7 +66,7 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">IEEE 802.11b</a></li><li><a href="#3">Scatterplot</a></li><li><a href="#4">BER curve for each data rate</a></li><li><a href="#5">BER curve for all data rates</a></li></ul></div><pre class="codeinput"><span class="comment">% ECE408 - Wireless Communications</span>
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">IEEE 802.11b</a></li><li><a href="#3">Constellation Scatterplot</a></li><li><a href="#4">BER curve for each data rate</a></li><li><a href="#5">BER curve for all data rates</a></li></ul></div><pre class="codeinput"><span class="comment">% ECE408 - Wireless Communications</span>
 <span class="comment">% Jongoh (Andy) Jeong</span>
 <span class="comment">% 802.11b WLAN Standard - Simulation Project</span>
 <span class="comment">% Date: February 19, 2020</span>
@@ -124,10 +124,10 @@ fprintf(<span class="string">'Simulation starting...\n'</span>); tic;
             <span class="comment">% modulate</span>
             preambleMod = ModSchemes.BarkerModulator(preamble',1);
             headerMod = ModSchemes.BarkerModulator(header',1);
-            msgMod = modFcns{rate}(psdu, dataRates(rate));
+            txSyms = modFcns{rate}(psdu, dataRates(rate));
 
             <span class="comment">% PSDU only: upsample, pass through a pulse shaping filter</span>
-            [h, upsampledChips, chipFilterDelay] = Filter.PulseShapeFilter(msgMod, spc);
+            [h, upsampledChips, chipFilterDelay] = Filter.PulseShapeFilter(txSyms, spc);
             samples = filter(h,1,upsampledChips);
 
             <span class="comment">% pack a PLCP packet frame</span>
@@ -144,17 +144,16 @@ fprintf(<span class="string">'Simulation starting...\n'</span>); tic;
             <span class="comment">% filer back (and downsample) PSDU only</span>
             <span class="comment">% assumption: perfectly knowing impulse response of the filter</span>
             filtTxSig = filter(h,1,samplesTx); <span class="comment">% column vector</span>
-            [RxChips,bitDelay] = Filter.Receiver(filtTxSig, spc, chipFilterDelay, BPSes(rate), chipSpreadLengths(rate));
-
-            <span class="comment">% demodulate PSDU</span>
-            rxBits = demodFcns{rate}(RxChips, dataRates(rate));
+            [rxSyms,bitDelay] = Filter.Receiver(filtTxSig, spc, chipFilterDelay, BPSes(rate), chipSpreadLengths(rate));
 
             <span class="comment">% demodulate preamble and header</span>
             frameRx = ModSchemes.BarkerDemodulator([preambleTx; headerTx],1);
-
             <span class="comment">% parse packet frame</span>
             [preambleRx, headerRx] = parseFrame(frameRx');
             checked = checkFrame(preamble, header, preambleRx, headerRx, dataRates(rate));
+
+            <span class="comment">% demodulate PSDU by methods specified in the preamble/header</span>
+            rxBits = demodFcns{rate}(rxSyms, dataRates(rate));
 
             <span class="keyword">if</span> checked == true
                 <span class="comment">% compute number of error bits</span>
@@ -335,14 +334,15 @@ SNR: 27.0	..........
 SNR: 28.0	..........
 SNR: 29.0	..........
 SNR: 30.0	..........
-Elapsed time is 366.635681 seconds.
+Elapsed time is 535.811740 seconds.
 Simulation completed.
-</pre><h2 id="3">Scatterplot</h2><p>clean up after seeing first zero, and scatterplot In-phase vs Quadrature</p><pre class="codeinput">figure(<span class="string">'Position'</span>,[300 300 900 600]); <span class="comment">% for scatter plots</span>
+</pre><h2 id="3">Constellation Scatterplot</h2><p>clean up after seeing first zero, and scatterplot In-phase vs Quadrature</p><pre class="codeinput">figure(<span class="string">'Position'</span>,[300 300 900 600]); <span class="comment">% for scatter plots</span>
 <span class="keyword">for</span> i = 1:size(BERVector,2)
-    idxZero = find(BERVector(:,i)'==0);
+    idxZero = find(BERVector(:,i)==0);
     BERVector(idxZero:end,i) = 0;
+
     fig = subplot(strcat(<span class="string">'22'</span>,num2str(i)));
-    plotScatter(fig, msgMod, samplesTx, rxBits, dataRates(i));
+    plotScatter(fig, txFrame, txNoisy, rxSyms, dataRates(i));
 <span class="keyword">end</span>
 </pre><img vspace="5" hspace="5" src="wlan80211b_packetframe_01.png" alt=""> <h2 id="4">BER curve for each data rate</h2><p>plot BER curve for each data rate separately</p><pre class="codeinput">figure(<span class="string">'Position'</span>,[300 300 900 600]);
 <span class="keyword">for</span> rate=1:4
@@ -352,19 +352,18 @@ Simulation completed.
     title(title_str); xlabel(<span class="string">'Eb/No (dB)'</span>); ylabel(<span class="string">'Bit Error Rate'</span>);
     set(gca, <span class="string">'FontSize'</span>, 12, <span class="string">'FontWeight'</span>,<span class="string">'bold'</span>);
 <span class="keyword">end</span>
-</pre><img vspace="5" hspace="5" src="wlan80211b_packetframe_02.png" alt=""> <h2 id="5">BER curve for all data rates</h2><p>plot BER curve for all data rates</p><pre class="codeinput">figure(<span class="string">'Position'</span>,[300 300 900 600]);
+</pre><img vspace="5" hspace="5" src="wlan80211b_packetframe_02.png" alt=""> <img vspace="5" hspace="5" src="wlan80211b_packetframe_03.png" alt=""> <h2 id="5">BER curve for all data rates</h2><p>plot BER curve for all data rates</p><pre class="codeinput">figure(<span class="string">'Position'</span>,[300 300 900 600]);
 shapes = [<span class="string">"^-"</span>,<span class="string">"^-"</span>,<span class="string">"*-"</span>,<span class="string">"*-"</span>];
 <span class="keyword">for</span> rate=1:4
-    semilogy(snrVector, BERVector(:,rate)',shapes(rate), <span class="keyword">...</span>
+    semilogy(snrVector, smoothdata(BERVector(:,rate)'),shapes(rate), <span class="keyword">...</span>
              <span class="string">'LineWidth'</span>, 2); grid <span class="string">on</span>; hold <span class="string">on</span>;
 <span class="keyword">end</span>
 hold <span class="string">off</span>;
 title(<span class="string">'802.11b: BER vs. SNR of Tx through an AWGN channel'</span>);
 legend(<span class="string">'Barker1'</span>,<span class="string">'Barker2'</span>,<span class="string">'CCK5.5'</span>,<span class="string">'CCK11'</span>,<span class="string">'Location'</span>,<span class="string">'SouthWest'</span>);
-<span class="comment">% ylim([1e-4 1e-0]);</span>
 xlabel(<span class="string">'Eb/No (dB)'</span>); ylabel(<span class="string">'Bit Error Rate'</span>);
 set(gca, <span class="string">'FontSize'</span>, 12, <span class="string">'FontWeight'</span>,<span class="string">'bold'</span>);
-</pre><img vspace="5" hspace="5" src="wlan80211b_packetframe_03.png" alt=""> <p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2019b</a><br></p></div><!--
+</pre><img vspace="5" hspace="5" src="wlan80211b_packetframe_04.png" alt=""> <p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2019b</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 % ECE408 - Wireless Communications
 % Jongoh (Andy) Jeong
@@ -426,10 +425,10 @@ for rate = 1:length(dataRates) %corrersponding to 4 different rate options (1, 2
             % modulate
             preambleMod = ModSchemes.BarkerModulator(preamble',1);
             headerMod = ModSchemes.BarkerModulator(header',1);
-            msgMod = modFcns{rate}(psdu, dataRates(rate));
+            txSyms = modFcns{rate}(psdu, dataRates(rate));
             
             % PSDU only: upsample, pass through a pulse shaping filter
-            [h, upsampledChips, chipFilterDelay] = Filter.PulseShapeFilter(msgMod, spc);
+            [h, upsampledChips, chipFilterDelay] = Filter.PulseShapeFilter(txSyms, spc);
             samples = filter(h,1,upsampledChips);
             
             % pack a PLCP packet frame
@@ -446,18 +445,17 @@ for rate = 1:length(dataRates) %corrersponding to 4 different rate options (1, 2
             % filer back (and downsample) PSDU only
             % assumption: perfectly knowing impulse response of the filter
             filtTxSig = filter(h,1,samplesTx); % column vector
-            [RxChips,bitDelay] = Filter.Receiver(filtTxSig, spc, chipFilterDelay, BPSes(rate), chipSpreadLengths(rate));
-            
-            % demodulate PSDU
-            rxBits = demodFcns{rate}(RxChips, dataRates(rate));    
+            [rxSyms,bitDelay] = Filter.Receiver(filtTxSig, spc, chipFilterDelay, BPSes(rate), chipSpreadLengths(rate));
             
             % demodulate preamble and header
             frameRx = ModSchemes.BarkerDemodulator([preambleTx; headerTx],1);
-            
             % parse packet frame
             [preambleRx, headerRx] = parseFrame(frameRx');
             checked = checkFrame(preamble, header, preambleRx, headerRx, dataRates(rate));
 
+            % demodulate PSDU by methods specified in the preamble/header
+            rxBits = demodFcns{rate}(rxSyms, dataRates(rate));    
+            
             if checked == true
                 % compute number of error bits
                 overlapSequenceMsgBin = msgBin(1:end-bitDelay);
@@ -477,14 +475,15 @@ end
 toc;
 fprintf('Simulation completed.\n');
 
-%% Scatterplot
+%% Constellation Scatterplot
 % clean up after seeing first zero, and scatterplot In-phase vs Quadrature
 figure('Position',[300 300 900 600]); % for scatter plots
 for i = 1:size(BERVector,2)
-    idxZero = find(BERVector(:,i)'==0);
+    idxZero = find(BERVector(:,i)==0);
     BERVector(idxZero:end,i) = 0;
+    
     fig = subplot(strcat('22',num2str(i)));
-    plotScatter(fig, msgMod, samplesTx, rxBits, dataRates(i));
+    plotScatter(fig, txFrame, txNoisy, rxSyms, dataRates(i));
 end
 
 %% BER curve for each data rate
@@ -502,13 +501,12 @@ end
 figure('Position',[300 300 900 600]);
 shapes = ["^-","^-","*-","*-"];
 for rate=1:4
-    semilogy(snrVector, BERVector(:,rate)',shapes(rate), ...
+    semilogy(snrVector, smoothdata(BERVector(:,rate)'),shapes(rate), ...
              'LineWidth', 2); grid on; hold on;
 end
 hold off;
 title('802.11b: BER vs. SNR of Tx through an AWGN channel');
 legend('Barker1','Barker2','CCK5.5','CCK11','Location','SouthWest');
-% ylim([1e-4 1e-0]);
 xlabel('Eb/No (dB)'); ylabel('Bit Error Rate');
 set(gca, 'FontSize', 12, 'FontWeight','bold');
 ##### SOURCE END #####

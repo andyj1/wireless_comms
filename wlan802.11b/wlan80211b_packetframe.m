@@ -10,7 +10,7 @@ rng default; % for reproducibility
 
 % Simulation Parameters
 snrVector = -8:1:30;
-nIter = 1; 
+nIter = 10; 
 % packet size: min: 4, max: 8192 as per 802.11 standards
 octetNumber = 1024; % number of octets (will be multiplied by 8)
 % samples per chip; samples will be up/down-sampled to this reference
@@ -108,7 +108,7 @@ end
 toc;
 fprintf('Simulation completed.\n');
 
-%% Scatterplot
+%% Constellation Scatterplot
 % clean up after seeing first zero, and scatterplot In-phase vs Quadrature
 figure('Position',[300 300 900 600]); % for scatter plots
 for i = 1:size(BERVector,2)
