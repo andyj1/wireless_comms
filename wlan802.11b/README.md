@@ -27,5 +27,5 @@
 
 ##### Bit Error Rate Curves
 
-![BER curve 1](res/ber.png)
-![BER curve 2](res/eachber.png)
+![BER curve 1](res/ber_all_rates.png)
+![BER curve 2](res/ber_per_rate.png)
