@@ -1,7 +1,9 @@
 ##### WLAN IEEE 802.11b
 
-- Simulation of IEEE 802.11b (Wireless Local Area Network) in MATLAB (R2019b; Requires Comms (modulators), DSP (comm. fcns), WLAN (scrambler) Toolbox)
-- For code, _wlan80211b_packetframe.m_ should contain packet frame generation (though preamble, header verification is omitted on the receiver side due to poor decoding predictions for CCK at the moment)
+- Simulation of IEEE 802.11b (Wireless Local Area Network) in MATLAB 
+  - (R2019b version; Toolbox: communications, DSP (for modulator), WLAN (for scrambler)
+- For code, _src/wlan80211b_packetframe.m_ should contain packet frame transmission (preamble, header verification between Tx and Rx is performed only)
+- Possible improvements: better CCK decoding technique, RAKE receiver with equalizers, etc.
 
 ##### IEEE 802.11b
 
@@ -14,9 +16,6 @@
 > - DSSS: Direct Sequence Spread Spectrum
 > - CCK: Complementary Code Keying
 
-![BER curve 1](html/ber.png)
-![BER curve 1](html/eachber.png)
-
 ##### Class definitions
 
 - _Filter_: Tx and Rx along with up/down-sampling
@@ -25,3 +24,8 @@
 > A written report is available [here](doc/ece408_802.11b_report.pdf)
 
 > A published file (MATLAB) is available [here](doc/wlan80211b_packetframe.pdf)
+
+##### Bit Error Rate Curves
+
+![BER curve 1](res/ber.png)
+![BER curve 2](res/eachber.png)
