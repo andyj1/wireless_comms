@@ -10,7 +10,7 @@ rng default; % for reproducibility
 
 % Simulation Parameters
 snrVector = -8:1:30;
-nIter = 10; 
+nIter = 1; 
 % packet size: min: 4, max: 8192 as per 802.11 standards
 octetNumber = 1024; % number of octets (will be multiplied by 8)
 % samples per chip; samples will be up/down-sampled to this reference
@@ -32,11 +32,6 @@ dataRates = [1, 2, 5.5, 11];
 BPSes = [1, 2, 4, 8];
 % chip spreading rates for all data rates
 chipSpreadLengths = [11, 11, 8, 8];
-
-% scrambler initialization seed
-% scramInit = 93;
-% msgBinSc = wlanScramble(msgBin,scramInit);
-% RxBits = wlanScramble(RxBitsDsc, scramInit);
 
 BERVector = zeros(length(snrVector),length(dataRates));
 fprintf('Simulation starting...\n'); tic;

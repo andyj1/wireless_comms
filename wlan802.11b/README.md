@@ -25,7 +25,12 @@
 
 > A published file (MATLAB) is available [here](doc/wlan80211b_packetframe.pdf)
 
-##### Bit Error Rate Curves
+##### Results
 
-![BER curve 1](res/ber_all_rates.png)
-![BER curve 2](res/ber_per_rate.png)
+> Bit Error Rate curves
+
+![BER curve 1](res/eachber.png)
+![BER curve 2](res/ber.png)
+
+> Constellations
+![Constellations](res/constellations.png)
