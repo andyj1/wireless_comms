@@ -21,7 +21,7 @@
 - _Filter_: Tx and Rx along with up/down-sampling
 - _ModSchemes_: BarkerModulator/Demodulator, CCKModulator/Demodulator, plotBarkerAutocorrelation
 
-> A written report is available [here](doc/ece408_802.11b_report.pdf)
+> A written report is available [here](doc/wlan802.11b_report.pdf)
 
 > A published file (MATLAB) is available [here](doc/wlan80211b_packetframe.pdf)
 
