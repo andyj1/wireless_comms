@@ -11,6 +11,7 @@
 - Effective in mitigating multipath fading
 - Branch signals are weighted with a gain factor, which is proportional to its own SNR
 - (-) Overheads in cost, size and power of remote units
+> For maximum likelihood decision-based decoding, equation for x_{equalized} in this [website link](http://www.dsplog.com/2008/09/28/maximal-ratio-combining/) is used.
 
 ##### Alamouti: transmit diversity scheme (STBC)
 
