@@ -12,6 +12,9 @@
 
 3. Maximal-Ratio Receiver Combining (''MRRC'') and Alamouti Space-Time Block Coding (''STBC'') Diversity Schemes
    - [report](tx_rx_diversity_schemes/doc/mrrc_alamouti_report.pdf) / [code](tx_rx_diversity_schemes/doc/mrrc_alamouti_sim_code.pdf)
+<<<<<<< HEAD
 
 4. Simple CDMA Decoding Task (Walsh channel, BPSK modulation)
    - [report](cdma_decode/doc/simple_cdma_report.pdf) / [code](cdma_decode/doc/simple_cdma_code.pdf)
+=======
+>>>>>>> 33c11275a7ae834c6202e5fc1148b11e1da6d41d
