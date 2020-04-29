@@ -35,6 +35,8 @@ initial_state = ones(max(taps),1);
 
 PNsequence = LFSR(taps, initial_state);
 
+% correlate with itself for debugging M sequence
+figure;plot(filter(fliplr(PNsequence'),1,repmat(PNsequence',1,5)));
 %% 3. Apply receive filter (Root Raised Cosine with B_RCOS coefficients)
 
 % apply the same filter used for Tx
