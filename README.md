@@ -18,4 +18,4 @@
    - [report](cdma_decode/doc/simple_cdma_report.pdf) / [code](cdma_decode/doc/simple_cdma_code.pdf)
 
 5. Single-User MIMO, OFDM, OFDM-MIMO Channel
-   - [report](ofdm_mimo/doc/report.pdf) / [code](ofdm_mimo/code_published.pdf)
+   - [report](ofdm_mimo/doc/report.pdf) / [code](ofdm_mimo/doc/code_published.pdf)
