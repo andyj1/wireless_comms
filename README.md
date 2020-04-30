@@ -15,4 +15,7 @@
    - [report](tx_rx_diversity_schemes/doc/mrrc_alamouti_report.pdf) / [code](tx_rx_diversity_schemes/doc/mrrc_alamouti_sim_code.pdf)
 
 4. Simple CDMA Decoding Task (Walsh channel, BPSK modulation)
-   - [report](cdma_decode/doc/simple_cdma_report.pdf) / [code](cdma_decode/doc/simple_cdma_code.pdf)
+   - [report](cdma_decode/doc/simple_cdma_report.pdf) / [code](cdma_decode/doc/simple_cdma_code.pdf
+
+5. Single-User MIMO, OFDM, MIMO-OFDM Channel
+   - [report](mimo_ofdm/doc/report.pdf) / [code](mimo_ofdm/code_published.pdf)

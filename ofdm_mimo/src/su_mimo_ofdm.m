@@ -1,13 +1,12 @@
 % ECE408 - Wireless Communications
 % Jongoh (Andy) Jeong
-% Project: MIMO, OFDM, MIMO-OFDM
+% Project: MIMO, OFDM, OFDM-MIMO
 % Date: April 29, 2020
 clear all; close all; clc;
 warning ('off','all');
 
 % Reference:
-% 
-% [1] Stuber et al. $Broadband\;MIMO-OFDM\;Wireless\;Communications$ 
+%   Stuber et al. $Broadband\;OFDM-MIMO\;Wireless\;Communications$ 
 
 %% Part 1: MIMO
 % model a 2x2 MIMO link with flat fading gains and 3 equalizer schemes: Pre-coding, Zero-forcing and MMSE
@@ -19,17 +18,17 @@ warning ('off','all');
 % <<../../res/SU_MIMO.png>>
 %
 % Reference: 
-% [2] https://www.sharetechnote.com/html/BasicProcedure_LTE_MIMO.html
+%   https://www.sharetechnote.com/html/BasicProcedure_LTE_MIMO.html
 
 %% Parameter Setup
 
-M = 16;            % modulation order
+M = 4;             % modulation order
 k = log2(M);       % coded bits per symbol
-nSyms = 1e3/2;     % number of symbols to send
+nSyms = 1e4;       % number of symbols to send
 nBits = nSyms * k;
 
-nChan = 3;      % number of flat fading MIMO channels
-EbNo = -10:2:30; % Eb/No
+nChan = 3;         % number of flat fading MIMO channels
+EbNo = -10:2:30;   % Eb/No
 snrVector = EbNo + 10*log10(k); % Es/No before adding noise
 
 % 2 x 2 MIMO channel
@@ -45,7 +44,8 @@ berMMSE = zeros(nChan, length(snrVector));
 %
 % <<../../res/mimo_precoding_descriptions.png>>
 %
-% Reference: Goldsmith, $Wireless\;Communications$ [pp. 323-324]
+% Reference
+%   Goldsmith, $Wireless\;Communications$ [pp. 323-324]
 
 % Transmit precoding: x = V*(x_hat)
 % Receiver shaping: (y_hat) = (U_hermitian_transposed)*y
@@ -74,7 +74,7 @@ for i = 1:nChan
         % pre-code data for each bit: inverting fading at transmitter (x = V * x_hat)
         prefiltered(:,:,bit) = V(:,:,bit) * dataMod(:,:,bit);
         % send over the fading channel
-        txData(:,:,bit) = H(:,:,bit)*prefiltered(:,:,bit);
+        txData(:,:,bit) = H(:,:,bit) * prefiltered(:,:,bit);
     end
     
     fprintf('SNR:\t');
@@ -86,9 +86,7 @@ for i = 1:nChan
        txNoisy = txData +  noise * 10^(-snrVector(j)/10/2);
        for bit = 1:nBits
            % post-code data for each bit: remove fading channel components
-           postfiltered(:,:,bit) = U(:,:,bit)' * txNoisy(:,:,bit);
-           % recover data
-           rxData(:,:,bit) = S(:,:,bit)^-1 * postfiltered(:,:,bit);
+           rxData(:,:,bit) = U(:,:,bit)' * txNoisy(:,:,bit);
        end
        
        % QAM demodulate and compute bit error rate
@@ -208,17 +206,15 @@ legend('Pre-Coding','Zero Forcing','MMSE');
 snapnow;
 
 %% Part 2: OFDM
-% Reference:
-%
-% - mmse equalizer:
-% [3] https://www.researchgate.net/publication/313955547_Performance_of_MMSE_channel_equalization_for_MIMO_OFDM_system
-%
-% - 801.11a:
-% [4] http://rfmw.em.keysight.com/wireless/helpfi0les/89600b/webhelp/subsystems/wlan-ofdm/Content/ofdm_80211-overview.htm
-%
-% [5] Goldsmith, $Wireless Communications$, [p.397]
-
 % assume perfect CSIR
+% Reference:
+% - MMSE Equalizer:
+%   https://www.researchgate.net/publication/313955547_Performance_of_MMSE_channel_equalization_for_MIMO_OFDM_system
+%
+% - IEEE 801.11a:
+%   http://rfmw.em.keysight.com/wireless/helpfi0les/89600b/webhelp/subsystems/wlan-ofdm/Content/ofdm_80211-overview.htm
+%   Goldsmith, $Wireless Communications$, [p.397]
+% 
 
 %% Parameter Setup
 
@@ -241,12 +237,12 @@ nPilot = 4;                     % number of pilots
 
 M = 16;                         % modulation order: 16 (QAM)
 nChan = 3;                      % number of unique (random) Rayleigh channels
-nSyms = 1e3/2;                    % number of OFDM symbols
+nSyms = 1e3/2;                  % number of OFDM symbols
 
-% single Rayleigh frequency selective channel with 4 taps by 802.11a PHY standard
+% frequency-selective channel by 802.11a PHY standard
 Ts = 4e-6;                      % symbol time per subchannel (sampling period of channel)
 Fd = 0;                         % maximum Doppler frequency shift (Hz)
-tau = [0 1e-5 3.5e-5 12e-5];    % path delays for 4 paths
+tau = [0 1e-5 3.5e-5 12e-5];    % path delays
 pdb = [0 -1 -1 -3];             % average path power gains in each path
 h = rayleighchan(Ts, Fd, tau, pdb);
 h.StoreHistory = 0;
@@ -285,7 +281,7 @@ for i = 1:nChan
     % insert cyclic prefix
     dataIFFTWithCP = [dataIFFT(nSubcarrier-nCP+1:nSubcarrier,:); dataIFFT];
     
-    % OFDM encode (flat fading Rayleigh channel)
+    % OFDM encode (frequency selective channel)
     for k=1:nSyms        
         chan(:,k) = filter(h,ones((nSubcarrier+nCP),1));
         txData(:,k) = chan(:,k) .* dataIFFTWithCP(:,k);
@@ -339,7 +335,7 @@ for i = 1:nChan
     % insert cyclic prefix
     dataIFFTWithCP = [dataIFFT(nSubcarrier-nCP+1:nSubcarrier,:); dataIFFT];
 
-    % OFDM encode (flat fading Rayleigh channel)
+    % OFDM encode (frequency selective channel)
     for k=1:nSyms
         chan(:,k) = filter(h,ones((nSubcarrier+nCP),1));
         txData(:,k) = chan(:,k).* dataIFFTWithCP(:,k);
@@ -382,7 +378,7 @@ ylabel('Bit Error Rate (avg over 3 flat fading channels)');
 legend('Zero Forcing','MMSE');
 snapnow;
 
-%% Part 3: MIMO-OFDM
+%% Part 3: OFDM-MIMO
 
 % close all; clear all; clc;
 % warning ('off','all');
@@ -397,8 +393,8 @@ snapnow;
 %% Parmeter Setup
 
 nChan = 3;                      % number of unique (random) Rayleigh channels
-nSyms = 1e2/2;                     % number of symbols to transmit
-M = 16;                         % modulation order: 16 (QAM)
+nSyms = 1e2/2;                  % number of symbols to transmit
+M = 4;                          % modulation order: 16 (QAM)
 k = log2(M);
 nBits = nSyms * k;
 
@@ -412,10 +408,10 @@ nCP = 16;                       % length of cyclic prefix
 nData = nSubcarrier - nCP;      % number of subcarriers used for data
 nPilot = 4;                     % number of pilots
 
-% single Rayleigh frequency selective channel with 4 taps by 802.11a PHY standard
+% Rayleigh frequency selective channel by 802.11a PHY standard
 Ts = 4e-6;                      % symbol time per subchannel (sampling period of channel)
 Fd = 0;                         % maximum Doppler frequency shift (Hz)
-tau = [0 1e-5 3.5e-5 12e-5];    % path delays for 4 paths
+tau = [0 1e-5 3.5e-5 12e-5];    % path delays
 pdb = [0 -1 -1 -3];             % average path power gains in each path
 h = rayleighchan(Ts, Fd, tau, pdb);
 h.StoreHistory = 0;
@@ -449,8 +445,9 @@ txMIMO = zeros(Mr,1,nData*nSyms*k);
 postfiltered = zeros(Mr,1,nData*nSyms*k);
 rxMIMO = zeros(Mr,1,nData*nSyms*k);
 
+disp('OFDM Zero-Forcing, MIMO Precoding/Zero-Forcing/MMSE')
 for i = 1:nChan
-    fprintf('Channel: %d\t',i);
+    fprintf('Channel: %d\n',i);
     
     % unique MIMO channel for 'Mr' receive and 'Mt' transmit antennas
     H = ( randn(Mr, Mt, nData*nSyms*k) + 1j*randn(Mr, Mt, nData*nSyms*k) ) / sqrt(2);
@@ -474,7 +471,7 @@ for i = 1:nChan
     % OFDM: insert cyclic prefix (CP)
     dataIFFTWithCP = [dataIFFT(nSubcarrier-nCP+1:nSubcarrier,:); dataIFFT];
     
-    % OFDM encode (flat fading Rayleigh channel)
+    % OFDM encode (frequency selective channel)
     for kk = 1:nSyms*k*Mt
         chan(:,kk) = filter(h,ones((nSubcarrier+nCP),1));
         txOFDM(:,kk) = chan(:,kk) .* dataIFFTWithCP(:,kk);
@@ -519,9 +516,7 @@ for i = 1:nChan
         
         for bit = 1:nData*nSyms*k
            % post-code data for each bit: remove fading channel components
-           postfiltered(:,:,bit) = U(:,:,bit)' * txMIMONoisy(:,:,bit);
-           % recover data
-           rxMIMO(:,:,bit) = S(:,:,bit)^-1 * postfiltered(:,:,bit);
+           rxMIMO(:,:,bit) = U(:,:,bit)' * txMIMONoisy(:,:,bit);
         end
         rxMIMOPrecoded = rxMIMO;
         clear rxMIMO;
@@ -594,8 +589,9 @@ txMIMO = zeros(Mr,1,nData*nSyms*k);
 postfiltered = zeros(Mr,1,nData*nSyms*k);
 rxMIMO = zeros(Mr,1,nData*nSyms*k);
 
+disp('OFDM MMSE, MIMO Precoding/Zero-Forcing/MMSE')
 for i = 1:nChan
-    fprintf('Channel: %d\t',i);
+    fprintf('Channel: %d\n',i);
     
     % unique MIMO channel for 'Mr' receive and 'Mt' transmit antennas
     H = ( randn(Mr, Mt, nData*nSyms*k) + 1j*randn(Mr, Mt, nData*nSyms*k) ) / sqrt(2);
@@ -619,7 +615,7 @@ for i = 1:nChan
     % OFDM: insert cyclic prefix (CP)
     dataIFFTWithCP = [dataIFFT(nSubcarrier-nCP+1:nSubcarrier,:); dataIFFT];
     
-    % OFDM encode (flat fading Rayleigh channel)
+    % OFDM encode (frequency selective channel)
     for kk = 1:nSyms*k*Mt
         chan(:,kk) = filter(h,ones((nSubcarrier+nCP),1));
         txOFDM(:,kk) = chan(:,kk) .* dataIFFTWithCP(:,kk);
@@ -666,9 +662,7 @@ for i = 1:nChan
         
         for bit = 1:nData*nSyms*k
            % post-code data for each bit: remove fading channel components
-           postfiltered(:,:,bit) = U(:,:,bit)' * txMIMONoisy(:,:,bit);
-           % recover data
-           rxMIMO(:,:,bit) = S(:,:,bit)^-1 * postfiltered(:,:,bit);
+           rxMIMO(:,:,bit) = U(:,:,bit)' * txMIMONoisy(:,:,bit);
         end
         rxMIMOPrecoded = rxMIMO;
         clear rxMIMO;
@@ -730,18 +724,18 @@ berOFDMmmse = permute(berOFDMmmse, [3 2 1]);
 
 %% Plot BER Curves
 figure('Renderer', 'painters', 'Position', [300 300 900 600])
-semilogy(EbNo, berOFDMZeroForcing(1,:), '-bo', ...
-         EbNo, berOFDMZeroForcing(2,:), '-b^', ...
-         EbNo, berOFDMZeroForcing(3,:), '-bv', 'LineWidth',1);
+semilogy(EbNo, berOFDMZeroForcing(1,:), '-ro', ...
+         EbNo, berOFDMZeroForcing(2,:), '-go', ...
+         EbNo, berOFDMZeroForcing(3,:), '-bo', 'LineWidth',1);
 hold on;
-semilogy(EbNo, berOFDMmmse(1,:), '-ko', ...
-         EbNo, berOFDMmmse(2,:), '-k^', ...
-         EbNo, berOFDMmmse(3,:), '-kv', 'LineWidth',1);
+semilogy(EbNo, berOFDMmmse(1,:), '-rv', ...
+         EbNo, berOFDMmmse(2,:), '-gv', ...
+         EbNo, berOFDMmmse(3,:), '-bv', 'LineWidth',1);
 grid on;
 xlim([EbNo(1)-2 EbNo(end)+2]);
 legend('OFDM ZF, MIMO Precoding','OFDM ZF, MIMO Zero Forcing','OFDM ZF, MIMO MMSE', ...
        'OFDM MMSE, MIMO Precoding','OFDM MMSE, MIMO Zero Forcing','OFDM MMSE, MIMO MMSE');
-title(sprintf('MIMO-OFDM: BER Curves by Equalizers, M = %d QAM', M));
+title(sprintf('OFDM-MIMO: BER Curves by Equalizers, M = %d QAM', M));
 set(gca, 'FontWeight','bold','LineWidth',1);
 xlabel('Eb/No (dB)');
 ylabel('Bit Error Rate (avg over 3 flat fading channels)');

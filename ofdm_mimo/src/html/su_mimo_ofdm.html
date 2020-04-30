@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>main</title><meta name="generator" content="MATLAB 9.7"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2020-04-26"><meta name="DC.source" content="main.m"><style type="text/css">
+      --><title>su_mimo_ofdm</title><meta name="generator" content="MATLAB 9.7"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2020-04-29"><meta name="DC.source" content="su_mimo_ofdm.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -66,23 +66,22 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">Part 1: MIMO</a></li><li><a href="#3">Background</a></li><li><a href="#4">Parameter Setup</a></li><li><a href="#5">Transmit Precoding and Receiver Shaping Scheme</a></li><li><a href="#6">Zero Forcing Scheme</a></li><li><a href="#7">MMSE Scheme</a></li><li><a href="#8">MIMO BER Curves</a></li><li><a href="#9">Part 2: OFDM</a></li><li><a href="#10">Parameter Setup</a></li><li><a href="#11">Zero Forcing Scheme</a></li><li><a href="#12">MMSE Scheme</a></li><li><a href="#13">Plot BER Curves</a></li><li><a href="#14">Part 3: MIMO-OFDM</a></li><li><a href="#15">Parmeter Setup</a></li><li><a href="#16">OFDM Zero-Forcing, MIMO Precoding/Zero-Forcing/MMSE</a></li><li><a href="#17">OFDM MMSE, MIMO Precoding/Zero-Forcing/MMSE</a></li><li><a href="#18">Plot BER Curves</a></li></ul></div><pre class="codeinput"><span class="comment">% ECE408 - Wireless Communications</span>
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">Part 1: MIMO</a></li><li><a href="#3">Background</a></li><li><a href="#4">Parameter Setup</a></li><li><a href="#5">Transmit Precoding and Receiver Shaping Scheme</a></li><li><a href="#6">Zero Forcing Scheme</a></li><li><a href="#7">MMSE Scheme</a></li><li><a href="#8">MIMO BER Curves</a></li><li><a href="#9">Part 2: OFDM</a></li><li><a href="#10">Parameter Setup</a></li><li><a href="#11">Zero Forcing Scheme</a></li><li><a href="#12">MMSE Scheme</a></li><li><a href="#13">Plot BER Curves</a></li><li><a href="#14">Part 3: OFDM-MIMO</a></li><li><a href="#15">Parmeter Setup</a></li><li><a href="#16">OFDM Zero-Forcing, MIMO Precoding/Zero-Forcing/MMSE</a></li><li><a href="#17">OFDM MMSE, MIMO Precoding/Zero-Forcing/MMSE</a></li><li><a href="#18">Plot BER Curves</a></li></ul></div><pre class="codeinput"><span class="comment">% ECE408 - Wireless Communications</span>
 <span class="comment">% Jongoh (Andy) Jeong</span>
-<span class="comment">% Project: MIMO, OFDM, MIMO-OFDM</span>
+<span class="comment">% Project: MIMO, OFDM, OFDM-MIMO</span>
 <span class="comment">% Date: April 29, 2020</span>
 clear <span class="string">all</span>; close <span class="string">all</span>; clc;
 warning (<span class="string">'off'</span>,<span class="string">'all'</span>);
 
 <span class="comment">% Reference:</span>
-<span class="comment">%</span>
-<span class="comment">% [1] Stuber et al. $Broadband MIMO-OFDM Wireless Communications$</span>
-</pre><h2 id="2">Part 1: MIMO</h2><p>model a 2x2 MIMO link with flat fading gains and 3 equalizer schemes: Pre-coding, Zero-forcing and MMSE  Pre-coding has CSIT, where Zero-forcing and MMSE has CSIR</p><h2 id="3">Background</h2><p>Single-User MIMO system with 2 Tx and 2 Rx antennas are described below:</p><p><img vspace="5" hspace="5" src="SU_MIMO.png" alt=""> </p><p>Reference: [2] <a href="https://www.sharetechnote.com/html/BasicProcedure_LTE_MIMO.html">https://www.sharetechnote.com/html/BasicProcedure_LTE_MIMO.html</a></p><h2 id="4">Parameter Setup</h2><pre class="codeinput">M = 16;          <span class="comment">% modulation order</span>
-k = log2(M);     <span class="comment">% coded bits per symbol</span>
-nSyms = 1e3/2;     <span class="comment">% number of symbols to send</span>
+<span class="comment">%   Stuber et al. $Broadband\;OFDM-MIMO\;Wireless\;Communications$</span>
+</pre><h2 id="2">Part 1: MIMO</h2><p>model a 2x2 MIMO link with flat fading gains and 3 equalizer schemes: Pre-coding, Zero-forcing and MMSE  Pre-coding has perfect CSIT, where Zero-forcing and MMSE has CSIR</p><h2 id="3">Background</h2><p>Single-User MIMO system with 2 Tx and 2 Rx antennas are described below:</p><p><img vspace="5" hspace="5" src="../../res/SU_MIMO.png" alt=""> </p><p>Reference:   <a href="https://www.sharetechnote.com/html/BasicProcedure_LTE_MIMO.html">https://www.sharetechnote.com/html/BasicProcedure_LTE_MIMO.html</a></p><h2 id="4">Parameter Setup</h2><pre class="codeinput">M = 4;             <span class="comment">% modulation order</span>
+k = log2(M);       <span class="comment">% coded bits per symbol</span>
+nSyms = 1e4;       <span class="comment">% number of symbols to send</span>
 nBits = nSyms * k;
 
-nChan = 3;      <span class="comment">% number of flat fading MIMO channels</span>
-EbNo = -10:2:30; <span class="comment">% Eb/No</span>
+nChan = 3;         <span class="comment">% number of flat fading MIMO channels</span>
+EbNo = -10:2:30;   <span class="comment">% Eb/No</span>
 snrVector = EbNo + 10*log10(k); <span class="comment">% Es/No before adding noise</span>
 
 <span class="comment">% 2 x 2 MIMO channel</span>
@@ -93,7 +92,7 @@ Mr = 2;
 berPreCoding = zeros(nChan, length(snrVector));
 berZeroForcing = zeros(nChan, length(snrVector));
 berMMSE = zeros(nChan, length(snrVector));
-</pre><h2 id="5">Transmit Precoding and Receiver Shaping Scheme</h2><p><img vspace="5" hspace="5" src="mimo_precoding_descriptions.png" alt=""> </p><p>Reference: Goldsmith, <img src="main_eq11461178088147398812.png" alt="$Wireless Communications$"> [pp. 323-324]</p><pre class="codeinput"><span class="comment">% Transmit precoding: x = V*(x_hat)</span>
+</pre><h2 id="5">Transmit Precoding and Receiver Shaping Scheme</h2><p><img vspace="5" hspace="5" src="../../res/mimo_precoding_descriptions.png" alt=""> </p><p>Reference   Goldsmith, <img src="su_mimo_ofdm_eq13747264674933376354.png" alt="$Wireless\;Communications$"> [pp. 323-324]</p><pre class="codeinput"><span class="comment">% Transmit precoding: x = V*(x_hat)</span>
 <span class="comment">% Receiver shaping: (y_hat) = (U_hermitian_transposed)*y</span>
 U = zeros(Mr, Mt, nBits);
 S = zeros(Mr, Mt, nBits);
@@ -120,7 +119,7 @@ disp(<span class="string">'MIMO precoding'</span>);
         <span class="comment">% pre-code data for each bit: inverting fading at transmitter (x = V * x_hat)</span>
         prefiltered(:,:,bit) = V(:,:,bit) * dataMod(:,:,bit);
         <span class="comment">% send over the fading channel</span>
-        txData(:,:,bit) = H(:,:,bit)*prefiltered(:,:,bit);
+        txData(:,:,bit) = H(:,:,bit) * prefiltered(:,:,bit);
     <span class="keyword">end</span>
 
     fprintf(<span class="string">'SNR:\t'</span>);
@@ -132,9 +131,7 @@ disp(<span class="string">'MIMO precoding'</span>);
        txNoisy = txData +  noise * 10^(-snrVector(j)/10/2);
        <span class="keyword">for</span> bit = 1:nBits
            <span class="comment">% post-code data for each bit: remove fading channel components</span>
-           postfiltered(:,:,bit) = U(:,:,bit)' * txNoisy(:,:,bit);
-           <span class="comment">% recover data</span>
-           rxData(:,:,bit) = S(:,:,bit)^-1 * postfiltered(:,:,bit);
+           rxData(:,:,bit) = U(:,:,bit)' * txNoisy(:,:,bit);
        <span class="keyword">end</span>
 
        <span class="comment">% QAM demodulate and compute bit error rate</span>
@@ -264,16 +261,15 @@ xlabel(<span class="string">'Eb/No (dB)'</span>);
 ylabel(<span class="string">'Bit Error Rate (avg over 3 flat fading channels)'</span>);
 legend(<span class="string">'Pre-Coding'</span>,<span class="string">'Zero Forcing'</span>,<span class="string">'MMSE'</span>);
 snapnow;
-</pre><img vspace="5" hspace="5" src="main_01.png" alt=""> <h2 id="9">Part 2: OFDM</h2><p>Reference:</p><p>- mmse equalizer: [3] <a href="https://www.researchgate.net/publication/313955547_Performance_of_MMSE_channel_equalization_for_MIMO_OFDM_system">https://www.researchgate.net/publication/313955547_Performance_of_MMSE_channel_equalization_for_MIMO_OFDM_system</a></p><p>- 801.11a: [4] <a href="http://rfmw.em.keysight.com/wireless/helpfi0les/89600b/webhelp/subsystems/wlan-ofdm/Content/ofdm_80211-overview.htm">http://rfmw.em.keysight.com/wireless/helpfi0les/89600b/webhelp/subsystems/wlan-ofdm/Content/ofdm_80211-overview.htm</a></p><p>[5] Goldsmith, <img src="main_eq11461178088147398812.png" alt="$Wireless Communications$">, [p.397]</p><pre class="codeinput"><span class="comment">% assume perfect CSIR</span>
-</pre><h2 id="10">Parameter Setup</h2><pre class="codeinput"><span class="comment">% close all; clear all; clc;</span>
+</pre><img vspace="5" hspace="5" src="su_mimo_ofdm_01.png" alt=""> <h2 id="9">Part 2: OFDM</h2><p>assume perfect CSIR Reference: - MMSE Equalizer:   <a href="https://www.researchgate.net/publication/313955547_Performance_of_MMSE_channel_equalization_for_MIMO_OFDM_system">https://www.researchgate.net/publication/313955547_Performance_of_MMSE_channel_equalization_for_MIMO_OFDM_system</a></p><p>- IEEE 801.11a:   <a href="http://rfmw.em.keysight.com/wireless/helpfi0les/89600b/webhelp/subsystems/wlan-ofdm/Content/ofdm_80211-overview.htm">http://rfmw.em.keysight.com/wireless/helpfi0les/89600b/webhelp/subsystems/wlan-ofdm/Content/ofdm_80211-overview.htm</a>   Goldsmith, <img src="su_mimo_ofdm_eq11461178088147398812.png" alt="$Wireless Communications$">, [p.397]</p><h2 id="10">Parameter Setup</h2><pre class="codeinput"><span class="comment">% close all; clear all; clc;</span>
 <span class="comment">% warning ('off','all');</span>
 
 <span class="comment">% 802.11a</span>
 <span class="comment">% &gt;&gt; each OFDM symbol has a total of 80 for data samples and cyclic prefix</span>
 <span class="comment">%   - N = 64 subcarriers are generated,</span>
-<span class="comment">%       of which 48 are used for data tx, 12 are zeroed to reduce ISI,</span>
+<span class="comment">%       of which 48 are used for data tx, 12 are zeroed to reduce ICI,</span>
 <span class="comment">%       4 used for pilot symbols for channel estimation;</span>
-<span class="comment">%   - subcarriers are evenly spaced over 20 MHz bandwidth into 312.5 kHz</span>
+<span class="comment">%       * subcarriers are evenly spaced over 20 MHz bandwidth into 312.5 kHz</span>
 <span class="comment">%   - CP: 16 samples</span>
 
 
@@ -284,12 +280,12 @@ nPilot = 4;                     <span class="comment">% number of pilots</span>
 
 M = 16;                         <span class="comment">% modulation order: 16 (QAM)</span>
 nChan = 3;                      <span class="comment">% number of unique (random) Rayleigh channels</span>
-nSyms = 1e3/2;                    <span class="comment">% number of OFDM symbols</span>
+nSyms = 1e3/2;                  <span class="comment">% number of OFDM symbols</span>
 
-<span class="comment">% single Rayleigh frequency selective channel with 4 taps by 802.11a PHY standard</span>
+<span class="comment">% frequency-selective channel by 802.11a PHY standard</span>
 Ts = 4e-6;                      <span class="comment">% symbol time per subchannel (sampling period of channel)</span>
 Fd = 0;                         <span class="comment">% maximum Doppler frequency shift (Hz)</span>
-tau = [0 1e-5 3.5e-5 12e-5];    <span class="comment">% path delays for 4 paths</span>
+tau = [0 1e-5 3.5e-5 12e-5];    <span class="comment">% path delays</span>
 pdb = [0 -1 -1 -3];             <span class="comment">% average path power gains in each path</span>
 h = rayleighchan(Ts, Fd, tau, pdb);
 h.StoreHistory = 0;
@@ -314,7 +310,7 @@ disp(<span class="string">'OFDM zero forcing'</span>);
     dataMod = qammod(msg, M);
     dataMod = reshape(dataMod, nData,[]);
 
-    <span class="comment">% 48 = data, 4 = pilot, rest (12) = zeros to reduce ISI</span>
+    <span class="comment">% 48 = data, 4 = pilot, rest (12) = zeros to reduce ICI</span>
     frame = zeros(nSubcarrier, nSyms);
     randomIdx = randperm(nSubcarrier);
     dataIdx = randomIdx(1:nData);
@@ -325,7 +321,7 @@ disp(<span class="string">'OFDM zero forcing'</span>);
     <span class="comment">% insert cyclic prefix</span>
     dataIFFTWithCP = [dataIFFT(nSubcarrier-nCP+1:nSubcarrier,:); dataIFFT];
 
-    <span class="comment">% OFDM encode (flat fading Rayleigh channel)</span>
+    <span class="comment">% OFDM encode (frequency selective channel)</span>
     <span class="keyword">for</span> k=1:nSyms
         chan(:,k) = filter(h,ones((nSubcarrier+nCP),1));
         txData(:,k) = chan(:,k) .* dataIFFTWithCP(:,k);
@@ -369,7 +365,7 @@ disp(<span class="string">'OFDM MMSE'</span>);
     dataMod = qammod(msg, M);
     dataMod = reshape(dataMod, nData,[]);
 
-    <span class="comment">% 48 = data, 4 = pilot, rest (12) = zeros to reduce ISI</span>
+    <span class="comment">% 48 = data, 4 = pilot, rest (12) = zeros to reduce ICI</span>
     frame = zeros(nSubcarrier, nSyms);
     randomIdx = randperm(nSubcarrier);
     dataIdx = randomIdx(1:nData);
@@ -380,7 +376,7 @@ disp(<span class="string">'OFDM MMSE'</span>);
     <span class="comment">% insert cyclic prefix</span>
     dataIFFTWithCP = [dataIFFT(nSubcarrier-nCP+1:nSubcarrier,:); dataIFFT];
 
-    <span class="comment">% OFDM encode (flat fading Rayleigh channel)</span>
+    <span class="comment">% OFDM encode (frequency selective channel)</span>
     <span class="keyword">for</span> k=1:nSyms
         chan(:,k) = filter(h,ones((nSubcarrier+nCP),1));
         txData(:,k) = chan(:,k).* dataIFFTWithCP(:,k);
@@ -427,7 +423,7 @@ xlabel(<span class="string">'Eb/No (dB)'</span>);
 ylabel(<span class="string">'Bit Error Rate (avg over 3 flat fading channels)'</span>);
 legend(<span class="string">'Zero Forcing'</span>,<span class="string">'MMSE'</span>);
 snapnow;
-</pre><img vspace="5" hspace="5" src="main_02.png" alt=""> <h2 id="14">Part 3: MIMO-OFDM</h2><pre class="codeinput"><span class="comment">% close all; clear all; clc;</span>
+</pre><img vspace="5" hspace="5" src="su_mimo_ofdm_02.png" alt=""> <h2 id="14">Part 3: OFDM-MIMO</h2><pre class="codeinput"><span class="comment">% close all; clear all; clc;</span>
 <span class="comment">% warning ('off','all');</span>
 
 <span class="comment">% Take the OFDM symbol and put it through a 2x2 frequency selective MIMO link.</span>
@@ -437,8 +433,8 @@ snapnow;
 
 <span class="comment">% assume perfect CSIR</span>
 </pre><h2 id="15">Parmeter Setup</h2><pre class="codeinput">nChan = 3;                      <span class="comment">% number of unique (random) Rayleigh channels</span>
-nSyms = 1e2/2;                     <span class="comment">% number of symbols to transmit</span>
-M = 16;                         <span class="comment">% modulation order: 16 (QAM)</span>
+nSyms = 1e2/2;                  <span class="comment">% number of symbols to transmit</span>
+M = 4;                          <span class="comment">% modulation order: 16 (QAM)</span>
 k = log2(M);
 nBits = nSyms * k;
 
@@ -452,10 +448,10 @@ nCP = 16;                       <span class="comment">% length of cyclic prefix<
 nData = nSubcarrier - nCP;      <span class="comment">% number of subcarriers used for data</span>
 nPilot = 4;                     <span class="comment">% number of pilots</span>
 
-<span class="comment">% single Rayleigh frequency selective channel with 4 taps by 802.11a PHY standard</span>
+<span class="comment">% Rayleigh frequency selective channel by 802.11a PHY standard</span>
 Ts = 4e-6;                      <span class="comment">% symbol time per subchannel (sampling period of channel)</span>
 Fd = 0;                         <span class="comment">% maximum Doppler frequency shift (Hz)</span>
-tau = [0 1e-5 3.5e-5 12e-5];    <span class="comment">% path delays for 4 paths</span>
+tau = [0 1e-5 3.5e-5 12e-5];    <span class="comment">% path delays</span>
 pdb = [0 -1 -1 -3];             <span class="comment">% average path power gains in each path</span>
 h = rayleighchan(Ts, Fd, tau, pdb);
 h.StoreHistory = 0;
@@ -486,8 +482,9 @@ txMIMO = zeros(Mr,1,nData*nSyms*k);
 postfiltered = zeros(Mr,1,nData*nSyms*k);
 rxMIMO = zeros(Mr,1,nData*nSyms*k);
 
+disp(<span class="string">'OFDM Zero-Forcing, MIMO Precoding/Zero-Forcing/MMSE'</span>)
 <span class="keyword">for</span> i = 1:nChan
-    fprintf(<span class="string">'Channel: %d\t'</span>,i);
+    fprintf(<span class="string">'Channel: %d\n'</span>,i);
 
     <span class="comment">% unique MIMO channel for 'Mr' receive and 'Mt' transmit antennas</span>
     H = ( randn(Mr, Mt, nData*nSyms*k) + 1j*randn(Mr, Mt, nData*nSyms*k) ) / sqrt(2);
@@ -500,7 +497,7 @@ rxMIMO = zeros(Mr,1,nData*nSyms*k);
     <span class="comment">% reshape for OFDM framing</span>
     txMsg = reshape(dataMod, nData,[]);
 
-    <span class="comment">% OFDM: 48 = data, 4 = pilot, rest (12) = zeros to reduce ISI</span>
+    <span class="comment">% OFDM: 48 = data, 4 = pilot, rest (12) = zeros to reduce ICI</span>
     randomIdx = randperm(nSubcarrier);
     dataIdx = randomIdx(1:nData);
     frame = zeros(nSubcarrier, nSyms*k*Mt);
@@ -511,7 +508,7 @@ rxMIMO = zeros(Mr,1,nData*nSyms*k);
     <span class="comment">% OFDM: insert cyclic prefix (CP)</span>
     dataIFFTWithCP = [dataIFFT(nSubcarrier-nCP+1:nSubcarrier,:); dataIFFT];
 
-    <span class="comment">% OFDM encode (flat fading Rayleigh channel)</span>
+    <span class="comment">% OFDM encode (frequency selective channel)</span>
     <span class="keyword">for</span> kk = 1:nSyms*k*Mt
         chan(:,kk) = filter(h,ones((nSubcarrier+nCP),1));
         txOFDM(:,kk) = chan(:,kk) .* dataIFFTWithCP(:,kk);
@@ -556,9 +553,7 @@ rxMIMO = zeros(Mr,1,nData*nSyms*k);
 
         <span class="keyword">for</span> bit = 1:nData*nSyms*k
            <span class="comment">% post-code data for each bit: remove fading channel components</span>
-           postfiltered(:,:,bit) = U(:,:,bit)' * txMIMONoisy(:,:,bit);
-           <span class="comment">% recover data</span>
-           rxMIMO(:,:,bit) = S(:,:,bit)^-1 * postfiltered(:,:,bit);
+           rxMIMO(:,:,bit) = U(:,:,bit)' * txMIMONoisy(:,:,bit);
         <span class="keyword">end</span>
         rxMIMOPrecoded = rxMIMO;
         clear <span class="string">rxMIMO</span>;
@@ -617,10 +612,14 @@ rxMIMO = zeros(Mr,1,nData*nSyms*k);
 
 berOFDMZeroForcing = mean(berOFDMZeroForcing,1);
 berOFDMZeroForcing = permute(berOFDMZeroForcing, [3 2 1]);
-</pre><pre class="codeoutput">Channel: 1	SNR:	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	
-Channel: 2	SNR:	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	
-Channel: 3	SNR:	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	
-</pre><img vspace="5" hspace="5" src="main_03.png" alt=""> <h2 id="17">OFDM MMSE, MIMO Precoding/Zero-Forcing/MMSE</h2><pre class="codeinput"><span class="comment">% initialize</span>
+</pre><pre class="codeoutput">OFDM Zero-Forcing, MIMO Precoding/Zero-Forcing/MMSE
+Channel: 1
+SNR:	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	
+Channel: 2
+SNR:	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	
+Channel: 3
+SNR:	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	
+</pre><h2 id="17">OFDM MMSE, MIMO Precoding/Zero-Forcing/MMSE</h2><pre class="codeinput"><span class="comment">% initialize</span>
 U = zeros(Mr, Mt, nData*nSyms*k);
 S = zeros(Mr, Mt, nData*nSyms*k);
 V = zeros(Mr, Mt, nData*nSyms*k);
@@ -631,8 +630,9 @@ txMIMO = zeros(Mr,1,nData*nSyms*k);
 postfiltered = zeros(Mr,1,nData*nSyms*k);
 rxMIMO = zeros(Mr,1,nData*nSyms*k);
 
+disp(<span class="string">'OFDM MMSE, MIMO Precoding/Zero-Forcing/MMSE'</span>)
 <span class="keyword">for</span> i = 1:nChan
-    fprintf(<span class="string">'Channel: %d\t'</span>,i);
+    fprintf(<span class="string">'Channel: %d\n'</span>,i);
 
     <span class="comment">% unique MIMO channel for 'Mr' receive and 'Mt' transmit antennas</span>
     H = ( randn(Mr, Mt, nData*nSyms*k) + 1j*randn(Mr, Mt, nData*nSyms*k) ) / sqrt(2);
@@ -656,7 +656,7 @@ rxMIMO = zeros(Mr,1,nData*nSyms*k);
     <span class="comment">% OFDM: insert cyclic prefix (CP)</span>
     dataIFFTWithCP = [dataIFFT(nSubcarrier-nCP+1:nSubcarrier,:); dataIFFT];
 
-    <span class="comment">% OFDM encode (flat fading Rayleigh channel)</span>
+    <span class="comment">% OFDM encode (frequency selective channel)</span>
     <span class="keyword">for</span> kk = 1:nSyms*k*Mt
         chan(:,kk) = filter(h,ones((nSubcarrier+nCP),1));
         txOFDM(:,kk) = chan(:,kk) .* dataIFFTWithCP(:,kk);
@@ -703,9 +703,7 @@ rxMIMO = zeros(Mr,1,nData*nSyms*k);
 
         <span class="keyword">for</span> bit = 1:nData*nSyms*k
            <span class="comment">% post-code data for each bit: remove fading channel components</span>
-           postfiltered(:,:,bit) = U(:,:,bit)' * txMIMONoisy(:,:,bit);
-           <span class="comment">% recover data</span>
-           rxMIMO(:,:,bit) = S(:,:,bit)^-1 * postfiltered(:,:,bit);
+           rxMIMO(:,:,bit) = U(:,:,bit)' * txMIMONoisy(:,:,bit);
         <span class="keyword">end</span>
         rxMIMOPrecoded = rxMIMO;
         clear <span class="string">rxMIMO</span>;
@@ -764,60 +762,63 @@ rxMIMO = zeros(Mr,1,nData*nSyms*k);
 
 berOFDMmmse = mean(berOFDMmmse,1);
 berOFDMmmse = permute(berOFDMmmse, [3 2 1]);
-</pre><pre class="codeoutput">Channel: 1	SNR:	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	
-Channel: 2	SNR:	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	
-Channel: 3	SNR:	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	
+</pre><pre class="codeoutput">OFDM MMSE, MIMO Precoding/Zero-Forcing/MMSE
+Channel: 1
+SNR:	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	
+Channel: 2
+SNR:	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	
+Channel: 3
+SNR:	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	
 </pre><h2 id="18">Plot BER Curves</h2><pre class="codeinput">figure(<span class="string">'Renderer'</span>, <span class="string">'painters'</span>, <span class="string">'Position'</span>, [300 300 900 600])
-semilogy(EbNo, berOFDMZeroForcing(1,:), <span class="string">'-bo'</span>, <span class="keyword">...</span>
-         EbNo, berOFDMZeroForcing(2,:), <span class="string">'-b^'</span>, <span class="keyword">...</span>
-         EbNo, berOFDMZeroForcing(3,:), <span class="string">'-bv'</span>, <span class="string">'LineWidth'</span>,1);
+semilogy(EbNo, berOFDMZeroForcing(1,:), <span class="string">'-ro'</span>, <span class="keyword">...</span>
+         EbNo, berOFDMZeroForcing(2,:), <span class="string">'-go'</span>, <span class="keyword">...</span>
+         EbNo, berOFDMZeroForcing(3,:), <span class="string">'-bo'</span>, <span class="string">'LineWidth'</span>,1);
 hold <span class="string">on</span>;
-semilogy(EbNo, berOFDMmmse(1,:), <span class="string">'-ko'</span>, <span class="keyword">...</span>
-         EbNo, berOFDMmmse(2,:), <span class="string">'-k^'</span>, <span class="keyword">...</span>
-         EbNo, berOFDMmmse(3,:), <span class="string">'-kv'</span>, <span class="string">'LineWidth'</span>,1);
+semilogy(EbNo, berOFDMmmse(1,:), <span class="string">'-rv'</span>, <span class="keyword">...</span>
+         EbNo, berOFDMmmse(2,:), <span class="string">'-gv'</span>, <span class="keyword">...</span>
+         EbNo, berOFDMmmse(3,:), <span class="string">'-bv'</span>, <span class="string">'LineWidth'</span>,1);
 grid <span class="string">on</span>;
 xlim([EbNo(1)-2 EbNo(end)+2]);
 legend(<span class="string">'OFDM ZF, MIMO Precoding'</span>,<span class="string">'OFDM ZF, MIMO Zero Forcing'</span>,<span class="string">'OFDM ZF, MIMO MMSE'</span>, <span class="keyword">...</span>
        <span class="string">'OFDM MMSE, MIMO Precoding'</span>,<span class="string">'OFDM MMSE, MIMO Zero Forcing'</span>,<span class="string">'OFDM MMSE, MIMO MMSE'</span>);
-title(sprintf(<span class="string">'MIMO-OFDM: BER Curves by Equalizers, M = %d QAM'</span>, M));
+title(sprintf(<span class="string">'OFDM-MIMO: BER Curves by Equalizers, M = %d QAM'</span>, M));
 set(gca, <span class="string">'FontWeight'</span>,<span class="string">'bold'</span>,<span class="string">'LineWidth'</span>,1);
 xlabel(<span class="string">'Eb/No (dB)'</span>);
 ylabel(<span class="string">'Bit Error Rate (avg over 3 flat fading channels)'</span>);
 snapnow;
-</pre><img vspace="5" hspace="5" src="main_04.png" alt=""> <p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2019b</a><br></p></div><!--
+</pre><img vspace="5" hspace="5" src="su_mimo_ofdm_03.png" alt=""> <p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2019b</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 % ECE408 - Wireless Communications
 % Jongoh (Andy) Jeong
-% Project: MIMO, OFDM, MIMO-OFDM
+% Project: MIMO, OFDM, OFDM-MIMO
 % Date: April 29, 2020
 clear all; close all; clc;
 warning ('off','all');
 
 % Reference:
-% 
-% [1] Stuber et al. $Broadband MIMO-OFDM Wireless Communications$ 
+%   Stuber et al. $Broadband\;OFDM-MIMO\;Wireless\;Communications$ 
 
 %% Part 1: MIMO
 % model a 2x2 MIMO link with flat fading gains and 3 equalizer schemes: Pre-coding, Zero-forcing and MMSE
-% ** Pre-coding has CSIT, where Zero-forcing and MMSE has CSIR
+% ** Pre-coding has perfect CSIT, where Zero-forcing and MMSE has CSIR
 
 %% Background
 % Single-User MIMO system with 2 Tx and 2 Rx antennas are described below:
 %
-% <<SU_MIMO.png>>
+% <<../../res/SU_MIMO.png>>
 %
 % Reference: 
-% [2] https://www.sharetechnote.com/html/BasicProcedure_LTE_MIMO.html
+%   https://www.sharetechnote.com/html/BasicProcedure_LTE_MIMO.html
 
 %% Parameter Setup
 
-M = 16;          % modulation order
-k = log2(M);     % coded bits per symbol
-nSyms = 1e3/2;     % number of symbols to send
+M = 4;             % modulation order
+k = log2(M);       % coded bits per symbol
+nSyms = 1e4;       % number of symbols to send
 nBits = nSyms * k;
 
-nChan = 3;      % number of flat fading MIMO channels
-EbNo = -10:2:30; % Eb/No
+nChan = 3;         % number of flat fading MIMO channels
+EbNo = -10:2:30;   % Eb/No
 snrVector = EbNo + 10*log10(k); % Es/No before adding noise
 
 % 2 x 2 MIMO channel
@@ -831,9 +832,10 @@ berMMSE = zeros(nChan, length(snrVector));
 
 %% Transmit Precoding and Receiver Shaping Scheme
 %
-% <<mimo_precoding_descriptions.png>>
+% <<../../res/mimo_precoding_descriptions.png>>
 %
-% Reference: Goldsmith, $Wireless Communications$ [pp. 323-324]
+% Reference
+%   Goldsmith, $Wireless\;Communications$ [pp. 323-324]
 
 % Transmit precoding: x = V*(x_hat)
 % Receiver shaping: (y_hat) = (U_hermitian_transposed)*y
@@ -862,7 +864,7 @@ for i = 1:nChan
         % pre-code data for each bit: inverting fading at transmitter (x = V * x_hat)
         prefiltered(:,:,bit) = V(:,:,bit) * dataMod(:,:,bit);
         % send over the fading channel
-        txData(:,:,bit) = H(:,:,bit)*prefiltered(:,:,bit);
+        txData(:,:,bit) = H(:,:,bit) * prefiltered(:,:,bit);
     end
     
     fprintf('SNR:\t');
@@ -874,9 +876,7 @@ for i = 1:nChan
        txNoisy = txData +  noise * 10^(-snrVector(j)/10/2);
        for bit = 1:nBits
            % post-code data for each bit: remove fading channel components
-           postfiltered(:,:,bit) = U(:,:,bit)' * txNoisy(:,:,bit);
-           % recover data
-           rxData(:,:,bit) = S(:,:,bit)^-1 * postfiltered(:,:,bit);
+           rxData(:,:,bit) = U(:,:,bit)' * txNoisy(:,:,bit);
        end
        
        % QAM demodulate and compute bit error rate
@@ -996,17 +996,15 @@ legend('Pre-Coding','Zero Forcing','MMSE');
 snapnow;
 
 %% Part 2: OFDM
-% Reference:
-%
-% - mmse equalizer:
-% [3] https://www.researchgate.net/publication/313955547_Performance_of_MMSE_channel_equalization_for_MIMO_OFDM_system
-%
-% - 801.11a:
-% [4] http://rfmw.em.keysight.com/wireless/helpfi0les/89600b/webhelp/subsystems/wlan-ofdm/Content/ofdm_80211-overview.htm
-%
-% [5] Goldsmith, $Wireless Communications$, [p.397]
-
 % assume perfect CSIR
+% Reference:
+% - MMSE Equalizer:
+%   https://www.researchgate.net/publication/313955547_Performance_of_MMSE_channel_equalization_for_MIMO_OFDM_system
+%
+% - IEEE 801.11a:
+%   http://rfmw.em.keysight.com/wireless/helpfi0les/89600b/webhelp/subsystems/wlan-ofdm/Content/ofdm_80211-overview.htm
+%   Goldsmith, $Wireless Communications$, [p.397]
+% 
 
 %% Parameter Setup
 
@@ -1016,9 +1014,9 @@ snapnow;
 % 802.11a
 % >> each OFDM symbol has a total of 80 for data samples and cyclic prefix
 %   - N = 64 subcarriers are generated, 
-%       of which 48 are used for data tx, 12 are zeroed to reduce ISI, 
+%       of which 48 are used for data tx, 12 are zeroed to reduce ICI, 
 %       4 used for pilot symbols for channel estimation;
-%   - subcarriers are evenly spaced over 20 MHz bandwidth into 312.5 kHz
+%       * subcarriers are evenly spaced over 20 MHz bandwidth into 312.5 kHz
 %   - CP: 16 samples
 
 
@@ -1029,12 +1027,12 @@ nPilot = 4;                     % number of pilots
 
 M = 16;                         % modulation order: 16 (QAM)
 nChan = 3;                      % number of unique (random) Rayleigh channels
-nSyms = 1e3/2;                    % number of OFDM symbols
+nSyms = 1e3/2;                  % number of OFDM symbols
 
-% single Rayleigh frequency selective channel with 4 taps by 802.11a PHY standard
+% frequency-selective channel by 802.11a PHY standard
 Ts = 4e-6;                      % symbol time per subchannel (sampling period of channel)
 Fd = 0;                         % maximum Doppler frequency shift (Hz)
-tau = [0 1e-5 3.5e-5 12e-5];    % path delays for 4 paths
+tau = [0 1e-5 3.5e-5 12e-5];    % path delays
 pdb = [0 -1 -1 -3];             % average path power gains in each path
 h = rayleighchan(Ts, Fd, tau, pdb);
 h.StoreHistory = 0;
@@ -1062,7 +1060,7 @@ for i = 1:nChan
     dataMod = qammod(msg, M);
     dataMod = reshape(dataMod, nData,[]);
     
-    % 48 = data, 4 = pilot, rest (12) = zeros to reduce ISI
+    % 48 = data, 4 = pilot, rest (12) = zeros to reduce ICI
     frame = zeros(nSubcarrier, nSyms);
     randomIdx = randperm(nSubcarrier);
     dataIdx = randomIdx(1:nData);
@@ -1073,7 +1071,7 @@ for i = 1:nChan
     % insert cyclic prefix
     dataIFFTWithCP = [dataIFFT(nSubcarrier-nCP+1:nSubcarrier,:); dataIFFT];
     
-    % OFDM encode (flat fading Rayleigh channel)
+    % OFDM encode (frequency selective channel)
     for k=1:nSyms        
         chan(:,k) = filter(h,ones((nSubcarrier+nCP),1));
         txData(:,k) = chan(:,k) .* dataIFFTWithCP(:,k);
@@ -1116,7 +1114,7 @@ for i = 1:nChan
     dataMod = qammod(msg, M);
     dataMod = reshape(dataMod, nData,[]);
     
-    % 48 = data, 4 = pilot, rest (12) = zeros to reduce ISI
+    % 48 = data, 4 = pilot, rest (12) = zeros to reduce ICI
     frame = zeros(nSubcarrier, nSyms);
     randomIdx = randperm(nSubcarrier);
     dataIdx = randomIdx(1:nData);
@@ -1127,7 +1125,7 @@ for i = 1:nChan
     % insert cyclic prefix
     dataIFFTWithCP = [dataIFFT(nSubcarrier-nCP+1:nSubcarrier,:); dataIFFT];
 
-    % OFDM encode (flat fading Rayleigh channel)
+    % OFDM encode (frequency selective channel)
     for k=1:nSyms
         chan(:,k) = filter(h,ones((nSubcarrier+nCP),1));
         txData(:,k) = chan(:,k).* dataIFFTWithCP(:,k);
@@ -1170,7 +1168,7 @@ ylabel('Bit Error Rate (avg over 3 flat fading channels)');
 legend('Zero Forcing','MMSE');
 snapnow;
 
-%% Part 3: MIMO-OFDM
+%% Part 3: OFDM-MIMO
 
 % close all; clear all; clc;
 % warning ('off','all');
@@ -1185,8 +1183,8 @@ snapnow;
 %% Parmeter Setup
 
 nChan = 3;                      % number of unique (random) Rayleigh channels
-nSyms = 1e2/2;                     % number of symbols to transmit
-M = 16;                         % modulation order: 16 (QAM)
+nSyms = 1e2/2;                  % number of symbols to transmit
+M = 4;                          % modulation order: 16 (QAM)
 k = log2(M);
 nBits = nSyms * k;
 
@@ -1200,10 +1198,10 @@ nCP = 16;                       % length of cyclic prefix
 nData = nSubcarrier - nCP;      % number of subcarriers used for data
 nPilot = 4;                     % number of pilots
 
-% single Rayleigh frequency selective channel with 4 taps by 802.11a PHY standard
+% Rayleigh frequency selective channel by 802.11a PHY standard
 Ts = 4e-6;                      % symbol time per subchannel (sampling period of channel)
 Fd = 0;                         % maximum Doppler frequency shift (Hz)
-tau = [0 1e-5 3.5e-5 12e-5];    % path delays for 4 paths
+tau = [0 1e-5 3.5e-5 12e-5];    % path delays
 pdb = [0 -1 -1 -3];             % average path power gains in each path
 h = rayleighchan(Ts, Fd, tau, pdb);
 h.StoreHistory = 0;
@@ -1237,8 +1235,9 @@ txMIMO = zeros(Mr,1,nData*nSyms*k);
 postfiltered = zeros(Mr,1,nData*nSyms*k);
 rxMIMO = zeros(Mr,1,nData*nSyms*k);
 
+disp('OFDM Zero-Forcing, MIMO Precoding/Zero-Forcing/MMSE')
 for i = 1:nChan
-    fprintf('Channel: %d\t',i);
+    fprintf('Channel: %d\n',i);
     
     % unique MIMO channel for 'Mr' receive and 'Mt' transmit antennas
     H = ( randn(Mr, Mt, nData*nSyms*k) + 1j*randn(Mr, Mt, nData*nSyms*k) ) / sqrt(2);
@@ -1251,7 +1250,7 @@ for i = 1:nChan
     % reshape for OFDM framing 
     txMsg = reshape(dataMod, nData,[]);
     
-    % OFDM: 48 = data, 4 = pilot, rest (12) = zeros to reduce ISI
+    % OFDM: 48 = data, 4 = pilot, rest (12) = zeros to reduce ICI
     randomIdx = randperm(nSubcarrier);
     dataIdx = randomIdx(1:nData);
     frame = zeros(nSubcarrier, nSyms*k*Mt);
@@ -1262,7 +1261,7 @@ for i = 1:nChan
     % OFDM: insert cyclic prefix (CP)
     dataIFFTWithCP = [dataIFFT(nSubcarrier-nCP+1:nSubcarrier,:); dataIFFT];
     
-    % OFDM encode (flat fading Rayleigh channel)
+    % OFDM encode (frequency selective channel)
     for kk = 1:nSyms*k*Mt
         chan(:,kk) = filter(h,ones((nSubcarrier+nCP),1));
         txOFDM(:,kk) = chan(:,kk) .* dataIFFTWithCP(:,kk);
@@ -1307,9 +1306,7 @@ for i = 1:nChan
         
         for bit = 1:nData*nSyms*k
            % post-code data for each bit: remove fading channel components
-           postfiltered(:,:,bit) = U(:,:,bit)' * txMIMONoisy(:,:,bit);
-           % recover data
-           rxMIMO(:,:,bit) = S(:,:,bit)^-1 * postfiltered(:,:,bit);
+           rxMIMO(:,:,bit) = U(:,:,bit)' * txMIMONoisy(:,:,bit);
         end
         rxMIMOPrecoded = rxMIMO;
         clear rxMIMO;
@@ -1382,8 +1379,9 @@ txMIMO = zeros(Mr,1,nData*nSyms*k);
 postfiltered = zeros(Mr,1,nData*nSyms*k);
 rxMIMO = zeros(Mr,1,nData*nSyms*k);
 
+disp('OFDM MMSE, MIMO Precoding/Zero-Forcing/MMSE')
 for i = 1:nChan
-    fprintf('Channel: %d\t',i);
+    fprintf('Channel: %d\n',i);
     
     % unique MIMO channel for 'Mr' receive and 'Mt' transmit antennas
     H = ( randn(Mr, Mt, nData*nSyms*k) + 1j*randn(Mr, Mt, nData*nSyms*k) ) / sqrt(2);
@@ -1407,7 +1405,7 @@ for i = 1:nChan
     % OFDM: insert cyclic prefix (CP)
     dataIFFTWithCP = [dataIFFT(nSubcarrier-nCP+1:nSubcarrier,:); dataIFFT];
     
-    % OFDM encode (flat fading Rayleigh channel)
+    % OFDM encode (frequency selective channel)
     for kk = 1:nSyms*k*Mt
         chan(:,kk) = filter(h,ones((nSubcarrier+nCP),1));
         txOFDM(:,kk) = chan(:,kk) .* dataIFFTWithCP(:,kk);
@@ -1454,9 +1452,7 @@ for i = 1:nChan
         
         for bit = 1:nData*nSyms*k
            % post-code data for each bit: remove fading channel components
-           postfiltered(:,:,bit) = U(:,:,bit)' * txMIMONoisy(:,:,bit);
-           % recover data
-           rxMIMO(:,:,bit) = S(:,:,bit)^-1 * postfiltered(:,:,bit);
+           rxMIMO(:,:,bit) = U(:,:,bit)' * txMIMONoisy(:,:,bit);
         end
         rxMIMOPrecoded = rxMIMO;
         clear rxMIMO;
@@ -1518,25 +1514,22 @@ berOFDMmmse = permute(berOFDMmmse, [3 2 1]);
 
 %% Plot BER Curves
 figure('Renderer', 'painters', 'Position', [300 300 900 600])
-semilogy(EbNo, berOFDMZeroForcing(1,:), '-bo', ...
-         EbNo, berOFDMZeroForcing(2,:), '-b^', ...
-         EbNo, berOFDMZeroForcing(3,:), '-bv', 'LineWidth',1);
+semilogy(EbNo, berOFDMZeroForcing(1,:), '-ro', ...
+         EbNo, berOFDMZeroForcing(2,:), '-go', ...
+         EbNo, berOFDMZeroForcing(3,:), '-bo', 'LineWidth',1);
 hold on;
-semilogy(EbNo, berOFDMmmse(1,:), '-ko', ...
-         EbNo, berOFDMmmse(2,:), '-k^', ...
-         EbNo, berOFDMmmse(3,:), '-kv', 'LineWidth',1);
+semilogy(EbNo, berOFDMmmse(1,:), '-rv', ...
+         EbNo, berOFDMmmse(2,:), '-gv', ...
+         EbNo, berOFDMmmse(3,:), '-bv', 'LineWidth',1);
 grid on;
 xlim([EbNo(1)-2 EbNo(end)+2]);
 legend('OFDM ZF, MIMO Precoding','OFDM ZF, MIMO Zero Forcing','OFDM ZF, MIMO MMSE', ...
        'OFDM MMSE, MIMO Precoding','OFDM MMSE, MIMO Zero Forcing','OFDM MMSE, MIMO MMSE');
-title(sprintf('MIMO-OFDM: BER Curves by Equalizers, M = %d QAM', M));
+title(sprintf('OFDM-MIMO: BER Curves by Equalizers, M = %d QAM', M));
 set(gca, 'FontWeight','bold','LineWidth',1);
 xlabel('Eb/No (dB)');
 ylabel('Bit Error Rate (avg over 3 flat fading channels)');
 snapnow;
-    
-    
-
 
 ##### SOURCE END #####
 --></body></html>

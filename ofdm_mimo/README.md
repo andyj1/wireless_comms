@@ -60,19 +60,19 @@ The requirements of this implementation is as follows:
 ![MIMO-OFDM BER Curve](res/mimo_ofdm.png)
 
 #### References
-
 [1] Agarwal, Ami, et al. “LINEAR VS NON LINEAR EQUALIZER IN DIFFERENT CHANNEL CONDITION.” International Journal of Advanced Technology &amp; Engineering Research (IJATER) 3rd International e-Conference on Emerging Trends in Technology, 2014. ICETT 2014; ISSN: 2250-3536
 
-[2] Bassou, Abdesselam & Hasni, Abdelhafid & Lakhdar, Abdelmounaim. (2014). UTTCM-based optimization of coded communication system. American Journal of Computation, Communication and Control. 1. 50-55.
+[2] Bassou, Abdesselam & Hasni, Abdelhafid & Lakhdar, Abdelmounaim. (2014). UTTCM-based optimization of coded communication system. American Journal of Computation, Communication and Control. 1. 50-55. 
 
 [3] “MIMO(Multiple Input Multiple Output),” ShareTechnote. [Online]. Available: https://www.sharetechnote.com/html/BasicProcedure--
 LTEMIMO.html. [Accessed: 24-Apr-2020].
 
 [4] Andrea Goldsmith. 2005. Wireless Communications. Cambridge University Press, USA.
 
-[5] “Concepts of Orthogonal Frequency Division Multiplexing (OFDM) and 802.11 WLAN,” Concepts of Orthogonal Frequency Division Multiplexing (OFDM) and 802.11 WLAN. [Online]. Available: http://rfmw.em.keysight.com/wireless/helpfiles/89600b/webhelp/subsystems/
-wlan-ofdm/Content/ofdm_basicprinciplesoverview.htm. [Accessed: 24-Apr-2020].
+[5] “Concepts of Orthogonal Frequency Division Multiplexing (OFDM) and 802.11 WLAN,” Concepts of Orthogonal Frequency Division Multiplexing (OFDM) and 802.11 WLAN. [Online]. Available: http://rfmw.em.keysight.com/wireless/helpfiles/89600b/webhelp/subsystems/wlan-ofdm/Content/ofdm\_basicprinciplesoverview.htm. [Accessed: 24-Apr-2020].
 
-[6] G. L. Stuber, J. R. Barry, S. W. McLaughlin, Ye Li, M. A. Ingram and T. G. Pratt, "Broadband MIMO-OFDM wireless communications," in Proceedings of the IEEE, vol. 92, no. 2, pp. 271-294, Feb. 2004.
+[6] G. L. Stuber, J. R. Barry, S. W. McLaughlin, Ye Li, M. A. Ingram and T. G. Pratt, "Broadband OFDM-MIMO wireless communications," in Proceedings of the IEEE, vol. 92, no. 2, pp. 271-294, Feb. 2004.
 
 [7] Bhagwatkar, Sonali \& Patil, B P \& Satpute, Bhalchandra. (2016). Performance of MMSE channel equalization for MIMO OFDM system. 1-3. 10.1109/ICCUBEA.2016.7860083.
+
+[8] Renfors, Markku, et al. “12.3.3.” Orthogonal Waveforms and Filter Banks for Future Communication Systems, edited by Xavier Mestre, Academic Press, 2017, pp. 315–316.
