@@ -59,7 +59,7 @@ The requirements of this implementation is as follows:
 
 > Bit Error Rate curve
 
-![OFDM-MIMO BER Curve](res/ofdm_mimo.png)
+![OFDM-MIMO BER Curve](src/html/ofdm_mimo.png)
 
 #### References
 [1] Agarwal, Ami, et al. “LINEAR VS NON LINEAR EQUALIZER IN DIFFERENT CHANNEL CONDITION.” International Journal of Advanced Technology &amp; Engineering Research (IJATER) 3rd International e-Conference on Emerging Trends in Technology, 2014. ICETT 2014; ISSN: 2250-3536
